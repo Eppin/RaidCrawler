@@ -10,6 +10,7 @@ namespace RaidCrawler.Structures
 
         public const string RaidBlockPointer = "[[main+44A98C8]+180]+40";
         public const string SaveBlockPointer = "[[[[main+44AAC88]+E0]+80]+08]"; // Thanks Lincoln-LM!
+        public static (int, uint) KOverworld = (0x4340, 0x173304D8); // [0x158+7C][20] overworld pokemon
         public static (int, uint)[] DifficultyFlags = { (0x2C1A0, 0xEC95D8EF), (0x1F5E0, 0xA9428DFE), (0x1B800, 0x9535F471), (0x14040, 0x6E7F8220) };
         public static (int, uint) BCATRaidBinaryLocation = (0x1040, 0x520A1B0); // Thanks Lincoln-LM!
         public static (int, uint) BCATRaidPriorityLocation = (0x1860, 0x95451E4); // Thanks Lincoln-LM!

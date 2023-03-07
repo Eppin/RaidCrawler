@@ -5,7 +5,6 @@ using PKHeX.Drawing.PokeSprite;
 using RaidCrawler.Structures;
 using RaidCrawler.Subforms;
 using SysBot.Base;
-using System.Data;
 using System.Diagnostics;
 using System.Net.Sockets;
 using System.Text;
@@ -289,6 +288,16 @@ namespace RaidCrawler
             var delivery_fixed_rewards = await ReadBlockDefault(BCATRaidFixedRewardLocation, "fixed_reward_item_array", force);
             var delivery_lottery_rewards = await ReadBlockDefault(BCATRaidLotteryRewardLocation, "lottery_reward_item_array", force);
 
+            var bytes = await ReadBlockDefault(KOverworld, "k_overworld", force);
+            var size = 9_360 / 20; // PkHeX: [0x158+7C][20] = 9360 bytes
+            var results = new StringBuilder();
+            for (var i = 0; i < 20; i++)
+            {
+                var pk9 = new PK9(bytes.Skip(size * i).Take(size).ToArray());
+                results.AppendLine($"{i + 1}, {pk9.Valid}, ({pk9.Species}, {(Species)pk9.Species}), {(Nature)pk9.Nature}, {pk9.IV_HP}/{pk9.IV_ATK}/{pk9.IV_DEF}/{pk9.IV_SPA}/{pk9.IV_SPD}/{pk9.IV_SPE}");
+            }
+            await File.WriteAllTextAsync("./ow-test.txt", results.ToString());
+
             Raid.DistTeraRaids = TeraDistribution.GetAllEncounters(delivery_raid_fbs);
             Raid.DeliveryRaidFixedRewards = FlatbufferDumper.DumpFixedRewards(delivery_fixed_rewards);
             Raid.DeliveryRaidLotteryRewards = FlatbufferDumper.DumpLotteryRewards(delivery_lottery_rewards);
@@ -310,7 +319,7 @@ namespace RaidCrawler
                 if (read_key == key)
                     return (offset, read_key);
             }
-            throw new ArgumentOutOfRangeException("Save block not found in range +- 0x1000");
+            throw new ArgumentOutOfRangeException($"Save block not found in range +- 0x1000 for key [{key:X}]");
         }
 
         private static byte[] DecryptBlock(uint key, byte[] block)
