@@ -8,6 +8,7 @@ namespace RaidCrawler.Core.Interfaces
         bool EnableNotification { get; set; }
         bool ToggleDen { get; set; }
         string InstanceName { get; set; }
+        string DiscordLoggingWebhook { get; set; }
         string DiscordWebhook { get; set; }
         string DiscordMessageContent { get; set; }
 

@@ -20,6 +20,7 @@ namespace RaidCrawler.WinForms
         public bool EnableAlertWindow { get; set; } = true;
         public string AlertWindowMessage { get; set; } = "Match found! Hold Shift and click one of the arrow keys to jump to the matching result.";
         public bool EnableNotification { get; set; } = false;
+        public string DiscordLoggingWebhook { get; set; } = string.Empty;
         public string DiscordWebhook { get; set; } = string.Empty;
         public string DiscordMessageContent { get; set; } = string.Empty;
 
