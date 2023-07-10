@@ -415,6 +415,7 @@ namespace RaidCrawler.WinForms
 
                 var stop = false;
                 var raids = RaidContainer.Raids;
+                var totalHours = 12;
                 while (!stop)
                 {
                     var previousSeeds = raids.Select(z => z.Seed).ToList();
@@ -437,6 +438,17 @@ namespace RaidCrawler.WinForms
                     Invoke(() => Label_DayAdvance.Text = advanceText);
                     if (teraRaidView is not null)
                         Invoke(() => teraRaidView.DaySkips.Text = advanceText);
+
+                    // Reset game after 12 hours, to avoid memory leaks!
+                    if (stopwatch.Elapsed.TotalHours >= totalHours)
+                    {
+                        LogUtil.LogInfo("Start restarting game...", string.Empty);
+
+                        await ConnectionWrapper.SaveGame(Config, token).ConfigureAwait(false);
+                        await ConnectionWrapper.CloseGame(token).ConfigureAwait(false);
+                        await ConnectionWrapper.StartGame(token).ConfigureAwait(false);
+                        totalHours += 12;
+                    }
                 }
 
                 stopwatch.Stop();
