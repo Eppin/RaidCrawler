@@ -1,3 +1,5 @@
+using Microsoft.VisualBasic;
+using NLog;
 using PKHeX.Core;
 using PKHeX.Drawing;
 using PKHeX.Drawing.PokeSprite;
@@ -8,7 +10,9 @@ using RaidCrawler.WinForms.SubForms;
 using SysBot.Base;
 using System.Data;
 using System.Diagnostics;
+using System.Text;
 using System.Text.Json;
+using System.Windows.Forms;
 using static RaidCrawler.Core.Structures.Offsets;
 
 namespace RaidCrawler.WinForms
@@ -52,6 +56,8 @@ namespace RaidCrawler.WinForms
 
         public MainWindow()
         {
+            LogUtil.Forwarders.Add(Logger);
+
             string build = string.Empty;
 #if DEBUG
             var date = File.GetLastWriteTime(AppContext.BaseDirectory);
@@ -112,6 +118,11 @@ namespace RaidCrawler.WinForms
                 USB_Port_TB.Visible = false;
                 USB_Port_label.Visible = false;
             }
+        }
+
+        private void Logger(string msg, string identity)
+        {
+            Webhook.SendLogging(msg, identity);
         }
 
         private void UpdateStatus(string status)
@@ -397,6 +408,7 @@ namespace RaidCrawler.WinForms
                 _WindowState = WindowState;
 
                 var advanceTextInit = $"Day Skip Successes {GetStatDaySkipSuccess()} / {GetStatDaySkipTries()}";
+                LogUtil.LogInfo(advanceTextInit, string.Empty);
                 Invoke(() => Label_DayAdvance.Text = advanceTextInit);
                 if (teraRaidView is not null)
                     Invoke(() => teraRaidView.DaySkips.Text = advanceTextInit);
@@ -421,6 +433,7 @@ namespace RaidCrawler.WinForms
                     stop = StopAdvanceDate(previousSeeds);
 
                     var advanceText = $"Day Skip Successes {GetStatDaySkipSuccess()} / {GetStatDaySkipTries()}";
+                    LogUtil.LogInfo(advanceText, string.Empty);
                     Invoke(() => Label_DayAdvance.Text = advanceText);
                     if (teraRaidView is not null)
                         Invoke(() => teraRaidView.DaySkips.Text = advanceText);
@@ -1163,6 +1176,8 @@ namespace RaidCrawler.WinForms
             var encounters = RaidContainer.Encounters;
             UpdateStatus("Completed!");
 
+            LogResults(raids, encounters);
+
             var filterMatchCount = Enumerable.Range(0, raids.Count).Count(c => RaidFilters.Any(z => z.FilterSatisfied(RaidContainer, encounters[c], raids[c], GetRaidBoost())));
             if (InvokeRequired)
                 Invoke(() => { LabelLoadedRaids.Text = $"Matches: {filterMatchCount}"; });
@@ -1190,6 +1205,20 @@ namespace RaidCrawler.WinForms
                 }
             }
         }
+
+        private void LogResults(IReadOnlyList<Raid> Raids, IReadOnlyList<ITeraRaid> Encounters)
+        {
+            foreach (var index in Enumerable.Range(0, Raids.Count))
+            {
+                var raid = Raids[index];
+                var encounter = Encounters[index];
+
+                var message = Webhook.LogEncounter(index, encounter, raid);
+
+                LogUtil.LogInfo(message, string.Empty, raid.IsShiny);
+            }
+        }
+
 
         public void Game_SelectedIndexChanged(string name)
         {

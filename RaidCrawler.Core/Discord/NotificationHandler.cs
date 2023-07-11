@@ -59,6 +59,47 @@ namespace RaidCrawler.Core.Discord
                 await _client.PostAsync(url.Trim(), content, token).ConfigureAwait(false);
         }
 
+        public async Task SendLogging(string msg, string identity)
+        {
+            if (string.IsNullOrWhiteSpace(Config.DiscordLoggingWebhook))
+                return;
+
+
+            var webhook = new
+            {
+                username = $"RaidCrawler {Config.InstanceName}",
+                avatar_url = "https://www.serebii.net/scarletviolet/ribbons/mightiestmark.png",
+                content = $"> [{DateTime.Now:HH:mm:ss}] - {identity}: {msg}"
+            };
+
+            var content = new StringContent(JsonSerializer.Serialize(webhook), Encoding.UTF8, "application/json");
+            await _client.PostAsync(Config.DiscordLoggingWebhook.Trim(), content);
+        }
+
+        public string LogEncounter(int index, ITeraRaid? encounter, Raid raid)
+        {
+            var strings = GameInfo.GetStrings(1);
+
+            var message = $"{index}:";
+
+            if (encounter != null)
+            {
+                var param = encounter.GetParam();
+                var blank = new PK9
+                {
+                    Species = encounter.Species,
+                    Form = encounter.Form
+                };
+
+                Encounter9RNG.GenerateData(blank, param, EncounterCriteria.Unrestricted, raid.Seed);
+                message += $" {(raid.IsShiny ? "★ - " : "")}{strings.Species[encounter.Species]}{(encounter.Form != 0 ? $"-{encounter.Form}" : "")} | Seed: {raid.Seed:X8} EC: {raid.EC:X8} | PID: {raid.PID:X8} | Nature: {strings.Natures[blank.Nature]} | Gender: {(Gender)blank.Gender} | IVs: {IVsStringEmoji(ToSpeedLast(blank.IVs))}";
+            }
+            else
+                message += " (not valid)";
+
+            return message;
+        }
+
         public async Task SendScreenshot(ISwitchConnectionAsync nx, CancellationToken token)
         {
             if (DiscordWebhooks is null || !Config.EnableNotification)

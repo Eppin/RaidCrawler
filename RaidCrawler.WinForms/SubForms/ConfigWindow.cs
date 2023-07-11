@@ -34,6 +34,8 @@ namespace RaidCrawler.WinForms.SubForms
             DiscordMessageContent.Text = c.DiscordMessageContent;
             DiscordMessageContent.Enabled = EnableDiscordNotifications.Checked;
 
+            DiscordLoggingWebhook.Text = c.DiscordLoggingWebhook;
+
             UseTouch.Checked = c.UseTouch;
             UseOvershoot.Checked = c.UseOvershoot;
             SaveGame.Checked = c.SaveOnMatch;
@@ -99,6 +101,8 @@ namespace RaidCrawler.WinForms.SubForms
             c.EnableNotification = EnableDiscordNotifications.Checked;
             c.DiscordWebhook = DiscordWebhook.Text;
             c.DiscordMessageContent = DiscordMessageContent.Text;
+
+            c.DiscordLoggingWebhook = DiscordLoggingWebhook.Text;
 
             c.UseTouch = UseTouch.Checked;
             c.UseOvershoot = UseOvershoot.Checked;
