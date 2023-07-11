@@ -67,8 +67,8 @@ namespace RaidCrawler.WinForms.SubForms
             tabGeneral = new TabPage();
             Protocol_dropdown = new ComboBox();
             Protocol_label = new Label();
-            LabelDiscordLoggingWebhook = new System.Windows.Forms.Label();
-            DiscordLoggingWebhook = new System.Windows.Forms.TextBox();
+            LabelDiscordLoggingWebhook = new Label();
+            DiscordLoggingWebhook = new TextBox();
             label23 = new Label();
             LabelEventProgress = new Label();
             EventProgress = new ComboBox();
@@ -78,6 +78,8 @@ namespace RaidCrawler.WinForms.SubForms
             StoryProgress = new ComboBox();
             tabMatch = new TabPage();
             tabAdvanceDate = new TabPage();
+            TimeSetDelay = new NumericUpDown();
+            L_TImeSetDelay = new Label();
             UseSetStick = new CheckBox();
             DodgeSystemUpdate = new CheckBox();
             SaveGameDelay = new NumericUpDown();
@@ -123,6 +125,7 @@ namespace RaidCrawler.WinForms.SubForms
             tabGeneral.SuspendLayout();
             tabMatch.SuspendLayout();
             tabAdvanceDate.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)TimeSetDelay).BeginInit();
             ((System.ComponentModel.ISupportInitialize)SaveGameDelay).BeginInit();
             ((System.ComponentModel.ISupportInitialize)SystemOvershoot).BeginInit();
             ((System.ComponentModel.ISupportInitialize)BaseDelay).BeginInit();
@@ -201,6 +204,7 @@ namespace RaidCrawler.WinForms.SubForms
             // 
             // SystemDDownPresses
             // 
+            SystemDDownPresses.Enabled = false;
             SystemDDownPresses.Location = new Point(296, 285);
             SystemDDownPresses.Maximum = new decimal(new int[] { 99, 0, 0, 0 });
             SystemDDownPresses.Name = "SystemDDownPresses";
@@ -219,6 +223,7 @@ namespace RaidCrawler.WinForms.SubForms
             // 
             // NavigateToSettings
             // 
+            NavigateToSettings.Enabled = false;
             NavigateToSettings.Location = new Point(296, 198);
             NavigateToSettings.Maximum = new decimal(new int[] { 9999, 0, 0, 0 });
             NavigateToSettings.Name = "NavigateToSettings";
@@ -228,6 +233,7 @@ namespace RaidCrawler.WinForms.SubForms
             // 
             // OpenSettings
             // 
+            OpenSettings.Enabled = false;
             OpenSettings.Location = new Point(296, 227);
             OpenSettings.Maximum = new decimal(new int[] { 9999, 0, 0, 0 });
             OpenSettings.Name = "OpenSettings";
@@ -237,6 +243,7 @@ namespace RaidCrawler.WinForms.SubForms
             // 
             // OpenHome
             // 
+            OpenHome.Enabled = false;
             OpenHome.Location = new Point(296, 169);
             OpenHome.Maximum = new decimal(new int[] { 9999, 0, 0, 0 });
             OpenHome.Name = "OpenHome";
@@ -282,6 +289,7 @@ namespace RaidCrawler.WinForms.SubForms
             // 
             // Hold
             // 
+            Hold.Enabled = false;
             Hold.Location = new Point(296, 256);
             Hold.Maximum = new decimal(new int[] { 9999, 0, 0, 0 });
             Hold.Name = "Hold";
@@ -300,6 +308,7 @@ namespace RaidCrawler.WinForms.SubForms
             // 
             // Submenu
             // 
+            Submenu.Enabled = false;
             Submenu.Location = new Point(296, 314);
             Submenu.Maximum = new decimal(new int[] { 9999, 0, 0, 0 });
             Submenu.Name = "Submenu";
@@ -318,6 +327,7 @@ namespace RaidCrawler.WinForms.SubForms
             // 
             // DateChange
             // 
+            DateChange.Enabled = false;
             DateChange.Location = new Point(296, 343);
             DateChange.Maximum = new decimal(new int[] { 9999, 0, 0, 0 });
             DateChange.Name = "DateChange";
@@ -336,6 +346,7 @@ namespace RaidCrawler.WinForms.SubForms
             // 
             // ReturnHome
             // 
+            ReturnHome.Enabled = false;
             ReturnHome.Location = new Point(296, 401);
             ReturnHome.Maximum = new decimal(new int[] { 9999, 0, 0, 0 });
             ReturnHome.Name = "ReturnHome";
@@ -354,6 +365,7 @@ namespace RaidCrawler.WinForms.SubForms
             // 
             // ReturnGame
             // 
+            ReturnGame.Enabled = false;
             ReturnGame.Location = new Point(296, 430);
             ReturnGame.Maximum = new decimal(new int[] { 9999, 0, 0, 0 });
             ReturnGame.Name = "ReturnGame";
@@ -372,6 +384,7 @@ namespace RaidCrawler.WinForms.SubForms
             // 
             // DaysToSkip
             // 
+            DaysToSkip.Enabled = false;
             DaysToSkip.Location = new Point(296, 372);
             DaysToSkip.Maximum = new decimal(new int[] { 99, 0, 0, 0 });
             DaysToSkip.Name = "DaysToSkip";
@@ -381,6 +394,7 @@ namespace RaidCrawler.WinForms.SubForms
             // UseTouch
             // 
             UseTouch.AutoSize = true;
+            UseTouch.Enabled = false;
             UseTouch.Location = new Point(8, 25);
             UseTouch.Name = "UseTouch";
             UseTouch.Size = new Size(267, 19);
@@ -439,15 +453,15 @@ namespace RaidCrawler.WinForms.SubForms
             tabControl1.Location = new Point(0, 0);
             tabControl1.Name = "tabControl1";
             tabControl1.SelectedIndex = 0;
-            tabControl1.Size = new Size(380, 543);
+            tabControl1.Size = new Size(380, 571);
             tabControl1.TabIndex = 41;
             // 
             // tabGeneral
             // 
             tabGeneral.Controls.Add(Protocol_dropdown);
             tabGeneral.Controls.Add(Protocol_label);
-            tabGeneral.Controls.Add(this.LabelDiscordLoggingWebhook);
-            tabGeneral.Controls.Add(this.DiscordLoggingWebhook);
+            tabGeneral.Controls.Add(LabelDiscordLoggingWebhook);
+            tabGeneral.Controls.Add(DiscordLoggingWebhook);
             tabGeneral.Controls.Add(label23);
             tabGeneral.Controls.Add(LabelEventProgress);
             tabGeneral.Controls.Add(EventProgress);
@@ -458,7 +472,7 @@ namespace RaidCrawler.WinForms.SubForms
             tabGeneral.Location = new Point(4, 24);
             tabGeneral.Name = "tabGeneral";
             tabGeneral.Padding = new Padding(3);
-            tabGeneral.Size = new Size(372, 515);
+            tabGeneral.Size = new Size(372, 543);
             tabGeneral.TabIndex = 5;
             tabGeneral.Text = "General";
             tabGeneral.UseVisualStyleBackColor = true;
@@ -483,20 +497,21 @@ namespace RaidCrawler.WinForms.SubForms
             Protocol_label.Size = new Size(120, 15);
             Protocol_label.TabIndex = 110;
             Protocol_label.Text = "Connection Protocol:";
+            // 
             // LabelDiscordLoggingWebhook
             // 
             LabelDiscordLoggingWebhook.AutoSize = true;
-            LabelDiscordLoggingWebhook.Location = new System.Drawing.Point(8, 227);
+            LabelDiscordLoggingWebhook.Location = new Point(8, 227);
             LabelDiscordLoggingWebhook.Name = "LabelDiscordLoggingWebhook";
-            LabelDiscordLoggingWebhook.Size = new System.Drawing.Size(299, 15);
+            LabelDiscordLoggingWebhook.Size = new Size(299, 15);
             LabelDiscordLoggingWebhook.TabIndex = 112;
             LabelDiscordLoggingWebhook.Text = "Send logging to Discord webhook (leave empty to skip)";
             // 
             // DiscordLoggingWebhook
             // 
-            DiscordLoggingWebhook.Location = new System.Drawing.Point(8, 245);
+            DiscordLoggingWebhook.Location = new Point(8, 245);
             DiscordLoggingWebhook.Name = "DiscordLoggingWebhook";
-            DiscordLoggingWebhook.Size = new System.Drawing.Size(357, 23);
+            DiscordLoggingWebhook.Size = new Size(357, 23);
             DiscordLoggingWebhook.TabIndex = 111;
             // 
             // label23
@@ -579,13 +594,15 @@ namespace RaidCrawler.WinForms.SubForms
             tabMatch.Location = new Point(4, 24);
             tabMatch.Name = "tabMatch";
             tabMatch.Padding = new Padding(3);
-            tabMatch.Size = new Size(372, 515);
+            tabMatch.Size = new Size(372, 543);
             tabMatch.TabIndex = 0;
             tabMatch.Text = "Match";
             tabMatch.UseVisualStyleBackColor = true;
             // 
             // tabAdvanceDate
             // 
+            tabAdvanceDate.Controls.Add(TimeSetDelay);
+            tabAdvanceDate.Controls.Add(L_TImeSetDelay);
             tabAdvanceDate.Controls.Add(UseSetStick);
             tabAdvanceDate.Controls.Add(DodgeSystemUpdate);
             tabAdvanceDate.Controls.Add(SaveGameDelay);
@@ -621,14 +638,33 @@ namespace RaidCrawler.WinForms.SubForms
             tabAdvanceDate.Location = new Point(4, 24);
             tabAdvanceDate.Name = "tabAdvanceDate";
             tabAdvanceDate.Padding = new Padding(3);
-            tabAdvanceDate.Size = new Size(372, 515);
+            tabAdvanceDate.Size = new Size(372, 543);
             tabAdvanceDate.TabIndex = 1;
             tabAdvanceDate.Text = "Advance Date";
             tabAdvanceDate.UseVisualStyleBackColor = true;
             // 
+            // TimeSetDelay
+            // 
+            TimeSetDelay.Location = new Point(296, 517);
+            TimeSetDelay.Maximum = new decimal(new int[] { 4000, 0, 0, 0 });
+            TimeSetDelay.Name = "TimeSetDelay";
+            TimeSetDelay.Size = new Size(68, 23);
+            TimeSetDelay.TabIndex = 47;
+            TimeSetDelay.Value = new decimal(new int[] { 2000, 0, 0, 0 });
+            // 
+            // L_TImeSetDelay
+            // 
+            L_TImeSetDelay.AutoSize = true;
+            L_TImeSetDelay.Location = new Point(8, 519);
+            L_TImeSetDelay.Name = "L_TImeSetDelay";
+            L_TImeSetDelay.Size = new Size(214, 15);
+            L_TImeSetDelay.TabIndex = 46;
+            L_TImeSetDelay.Text = "Time to wait for the game to read raids:";
+            // 
             // UseSetStick
             // 
             UseSetStick.AutoSize = true;
+            UseSetStick.Enabled = false;
             UseSetStick.Location = new Point(8, 109);
             UseSetStick.Name = "UseSetStick";
             UseSetStick.Size = new Size(222, 19);
@@ -640,6 +676,7 @@ namespace RaidCrawler.WinForms.SubForms
             // DodgeSystemUpdate
             // 
             DodgeSystemUpdate.AutoSize = true;
+            DodgeSystemUpdate.Enabled = false;
             DodgeSystemUpdate.Location = new Point(8, 88);
             DodgeSystemUpdate.Name = "DodgeSystemUpdate";
             DodgeSystemUpdate.Size = new Size(184, 19);
@@ -685,6 +722,7 @@ namespace RaidCrawler.WinForms.SubForms
             // 
             // SystemOvershoot
             // 
+            SystemOvershoot.Enabled = false;
             SystemOvershoot.Location = new Point(296, 459);
             SystemOvershoot.Maximum = new decimal(new int[] { 1200, 0, 0, 0 });
             SystemOvershoot.Name = "SystemOvershoot";
@@ -695,6 +733,7 @@ namespace RaidCrawler.WinForms.SubForms
             // UseOvershoot
             // 
             UseOvershoot.AutoSize = true;
+            UseOvershoot.Enabled = false;
             UseOvershoot.Location = new Point(8, 46);
             UseOvershoot.Name = "UseOvershoot";
             UseOvershoot.Size = new Size(355, 19);
@@ -705,6 +744,7 @@ namespace RaidCrawler.WinForms.SubForms
             // 
             // BaseDelay
             // 
+            BaseDelay.Enabled = false;
             BaseDelay.Location = new Point(296, 140);
             BaseDelay.Maximum = new decimal(new int[] { 9999, 0, 0, 0 });
             BaseDelay.Name = "BaseDelay";
@@ -728,7 +768,7 @@ namespace RaidCrawler.WinForms.SubForms
             tabWebhook.Controls.Add(EnableEmoji);
             tabWebhook.Location = new Point(4, 24);
             tabWebhook.Name = "tabWebhook";
-            tabWebhook.Size = new Size(372, 515);
+            tabWebhook.Size = new Size(372, 543);
             tabWebhook.TabIndex = 3;
             tabWebhook.Text = "Webhook";
             tabWebhook.UseVisualStyleBackColor = true;
@@ -870,7 +910,7 @@ namespace RaidCrawler.WinForms.SubForms
             tabExperimental.Location = new Point(4, 24);
             tabExperimental.Name = "tabExperimental";
             tabExperimental.Padding = new Padding(3);
-            tabExperimental.Size = new Size(372, 515);
+            tabExperimental.Size = new Size(372, 543);
             tabExperimental.TabIndex = 2;
             tabExperimental.Text = "Experimental";
             tabExperimental.UseVisualStyleBackColor = true;
@@ -900,7 +940,7 @@ namespace RaidCrawler.WinForms.SubForms
             tabAbout.Location = new Point(4, 24);
             tabAbout.Name = "tabAbout";
             tabAbout.Padding = new Padding(3);
-            tabAbout.Size = new Size(372, 515);
+            tabAbout.Size = new Size(372, 543);
             tabAbout.TabIndex = 4;
             tabAbout.Text = "About";
             tabAbout.UseVisualStyleBackColor = true;
@@ -950,7 +990,7 @@ namespace RaidCrawler.WinForms.SubForms
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(380, 543);
+            ClientSize = new Size(380, 571);
             Controls.Add(tabControl1);
             FormBorderStyle = FormBorderStyle.FixedDialog;
             MaximizeBox = false;
@@ -975,6 +1015,7 @@ namespace RaidCrawler.WinForms.SubForms
             tabMatch.PerformLayout();
             tabAdvanceDate.ResumeLayout(false);
             tabAdvanceDate.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)TimeSetDelay).EndInit();
             ((System.ComponentModel.ISupportInitialize)SaveGameDelay).EndInit();
             ((System.ComponentModel.ISupportInitialize)SystemOvershoot).EndInit();
             ((System.ComponentModel.ISupportInitialize)BaseDelay).EndInit();
@@ -1008,7 +1049,6 @@ namespace RaidCrawler.WinForms.SubForms
         private Label L_ScrollSystem;
         private NumericUpDown Hold;
         private Label L_SubmenuDelay;
-        private NumericUpDown Submenu;
         private Label L_DateChangeDelay;
         private NumericUpDown DateChange;
         private Label L_ReturnHomeDelay;
@@ -1068,5 +1108,8 @@ namespace RaidCrawler.WinForms.SubForms
         private CheckBox SaveGame;
         private CheckBox DodgeSystemUpdate;
         private CheckBox UseSetStick;
+        private NumericUpDown TimeSetDelay;
+        private Label L_TImeSetDelay;
+        protected NumericUpDown Submenu;
     }
 }

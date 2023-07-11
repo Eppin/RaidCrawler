@@ -31,6 +31,7 @@ namespace RaidCrawler.WinForms
         public bool SaveOnMatch { get; set; } = true;
         public bool UseSetStick { get; set; } = false;
 
+        public int TimeSetDelay { get; set; } = 2_000;
         public int OpenHomeDelay { get; set; } = 1_800;
         public int NavigateToSettingsDelay { get; set; } = 0_100;
         public int OpenSettingsDelay { get; set; } = 1_000;

@@ -7,6 +7,7 @@
         bool DodgeSystemUpdate { get; set; }
         bool UseSetStick { get; set; }
 
+        int TimeSetDelay { get; set; }
         int OpenHomeDelay { get; set; }
         int NavigateToSettingsDelay { get; set; }
         int OpenSettingsDelay { get; set; }

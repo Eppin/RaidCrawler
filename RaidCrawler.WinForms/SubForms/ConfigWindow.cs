@@ -42,6 +42,7 @@ namespace RaidCrawler.WinForms.SubForms
             DodgeSystemUpdate.Checked = c.DodgeSystemUpdate;
             UseSetStick.Checked = c.UseSetStick;
 
+            TimeSetDelay.Value = c.TimeSetDelay;
             OpenHome.Value = c.OpenHomeDelay;
             NavigateToSettings.Value = c.NavigateToSettingsDelay;
             OpenSettings.Value = c.OpenSettingsDelay;
@@ -110,6 +111,7 @@ namespace RaidCrawler.WinForms.SubForms
             c.DodgeSystemUpdate = DodgeSystemUpdate.Checked;
             c.UseSetStick = UseSetStick.Checked;
 
+            c.TimeSetDelay = (int)TimeSetDelay.Value;
             c.OpenHomeDelay = (int)OpenHome.Value;
             c.NavigateToSettingsDelay = (int)NavigateToSettings.Value;
             c.OpenSettingsDelay = (int)OpenSettings.Value;
