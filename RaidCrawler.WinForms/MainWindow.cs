@@ -447,6 +447,9 @@ namespace RaidCrawler.WinForms
                         await ConnectionWrapper.SaveGame(Config, token).ConfigureAwait(false);
                         await ConnectionWrapper.CloseGame(token).ConfigureAwait(false);
                         await ConnectionWrapper.StartGame(token).ConfigureAwait(false);
+
+                        RaidBlockOffset = 0;
+
                         totalHours += 12;
                     }
                 }
