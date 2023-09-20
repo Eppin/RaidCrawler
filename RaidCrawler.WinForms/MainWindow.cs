@@ -1115,15 +1115,8 @@ namespace RaidCrawler.WinForms
             double x, y;
             try
             {
-                if (den_locations.TryGetValue($"{raid.Area}-{raid.Den}_", out float[]? value))
-                {
-                    x = (value[0] + 2.072021484) * 512 / 5000;
-                    y = (value[2] + 5255.240018) * 512 / 5000;
-                    return ImageUtil.LayerImage(map, gem, (int)x, (int)y);
-                }
-
-                x = (den_locations[$"{raid.Area}-{raid.Den}"][0] + 2.072021484) * 512 / 5000;
-                y = (den_locations[$"{raid.Area}-{raid.Den}"][2] + 5255.240018) * 512 / 5000;
+                x = (den_locations[$"{raid.Area}-{raid.DisplayType}-{raid.Den}"][0] + 2.072021484) * 512 / 5000;
+                y = (den_locations[$"{raid.Area}-{raid.DisplayType}-{raid.Den}"][2] + 5255.240018) * 512 / 5000;
                 return ImageUtil.LayerImage(map, gem, (int)x, (int)y);
             }
             catch { return null; }
@@ -1303,7 +1296,7 @@ namespace RaidCrawler.WinForms
                 return;
             }
 
-            var form = new RewardsView(RaidContainer.Strings.Item, rewards);
+            var form = new RewardsView(RaidContainer.Strings.Item, RaidContainer.Strings.Move, rewards);
             ShowDialog(form);
         }
 

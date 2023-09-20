@@ -61,8 +61,7 @@ namespace RaidCrawler.Core.Structures
                         continue;
 
                     var total = container.Game == "Scarlet" ? encm.GetRandRateTotalScarlet(stage) : encm.GetRandRateTotalViolet(stage);
-                    if (total > 0)
-                        return enc;
+                    if (total > 0) return enc;
                 }
             }
             return null;
@@ -89,9 +88,17 @@ namespace RaidCrawler.Core.Structures
             List<Raid> newRaids = new();
             List<ITeraRaid> newTera = new();
             List<List<(int, int, int)>> newRewards = new();
+            int eventct = 0;
             for (int i = 0; i < count; i++)
             {
                 var raid = new Raid(data.AsSpan(i * Raid.SIZE, Raid.SIZE));
+
+                if (raid.Den == 0)
+                {
+                    eventct++;
+                    continue;
+                }
+
                 if (!raid.IsValid)
                     continue;
 
@@ -99,7 +106,7 @@ namespace RaidCrawler.Core.Structures
                 var raid_delivery_group_id = -1;
                 try
                 {
-                    raid_delivery_group_id = raid.GetDeliveryGroupID(container.DeliveryRaidPriority, possible_groups);
+                    raid_delivery_group_id = raid.GetDeliveryGroupID(container.DeliveryRaidPriority, possible_groups, eventct);
                 }
                 catch (Exception ex)
                 {
@@ -119,6 +126,8 @@ namespace RaidCrawler.Core.Structures
                     failed.encounter++;
                     continue;
                 }
+
+                if (raid.IsEvent) eventct++;
 
                 newRaids.Add(raid);
                 newTera.Add(encounter);
@@ -195,20 +204,21 @@ namespace RaidCrawler.Core.Structures
             };
         }
 
-        public static int GetDeliveryGroupID(this Raid raid, DeliveryGroupID ids, List<int> possible_groups)
+        public static int GetDeliveryGroupID(this Raid raid, DeliveryGroupID ids, List<int> possible_groups, int eventct)
         {
             if (!raid.IsEvent)
                 return -1;
 
             // WW/IL re-run has DeliveryGroupID = 3, having a Might7 alongside it conflicts.
-            bool group3 = possible_groups.Contains(3) && raid.Flags != 3;
             var groups = ids.GroupID;
+
+
             for (int i = 0; i < groups.Table_Length; i++)
             {
-                var ct = groups.Table(i) + (group3 ? 2 : raid.Flags != 3 ? 1 : 0);
-                var result = possible_groups.Find(x => x == ct);
-                if (result > 0)
-                    return ct;
+                var ct = groups.Table(i);
+                if (!possible_groups.Contains(i + 1)) continue;
+                if (eventct < ct) return i + 1;
+                eventct -= ct;
             }
             throw new Exception("Found event out of priority range.");
         }
