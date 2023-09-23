@@ -21,5 +21,7 @@
         int ReturnGameDelay { get; set; }
         int BaseDelay { get; set; }
         int SaveGameDelay { get; set; }
+        int RelaunchDelay { get; set; }
+        int ExtraOverworldWait { get; set; }
     }
 }
