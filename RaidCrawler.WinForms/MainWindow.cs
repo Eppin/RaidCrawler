@@ -39,14 +39,14 @@ namespace RaidCrawler.WinForms
         private readonly NotificationHandler Webhook;
 
         private List<RaidFilter> RaidFilters = new();
-        private static readonly Image map_base = Image.FromStream(
+        private static readonly Image MapBase = Image.FromStream(
             new MemoryStream(Utils.GetBinaryResource("paldea.png"))
         );
-        private static readonly Image map_kitakami = Image.FromStream(
+        private static readonly Image MapKitakami = Image.FromStream(
             new MemoryStream(Utils.GetBinaryResource("kitakami.png"))
         );
-        private static Dictionary<string, float[]>? den_locations_base;
-        private static Dictionary<string, float[]>? den_locations_kitakami;
+        private static Dictionary<string, float[]>? DenLocationsBase;
+        private static Dictionary<string, float[]>? DenLocationsKitakami;
 
         // statistics
         public int StatDaySkipTries = 0;
@@ -77,37 +77,28 @@ namespace RaidCrawler.WinForms
             build = $" (dev-{date:yyyyMMdd})";
 #endif
             var v = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version!;
-            var filterpath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "filters.json");
-            if (File.Exists(filterpath))
+            var filterPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "filters.json");
+            if (File.Exists(filterPath))
                 RaidFilters =
-                    JsonSerializer.Deserialize<List<RaidFilter>>(File.ReadAllText(filterpath))
+                    JsonSerializer.Deserialize<List<RaidFilter>>(File.ReadAllText(filterPath))
                     ?? new List<RaidFilter>();
-            den_locations_base = JsonSerializer.Deserialize<Dictionary<string, float[]>>(
+            DenLocationsBase = JsonSerializer.Deserialize<Dictionary<string, float[]>>(
                 Utils.GetStringResource("den_locations_base.json") ?? "{}"
             );
-            den_locations_kitakami = JsonSerializer.Deserialize<Dictionary<string, float[]>>(
+            DenLocationsKitakami = JsonSerializer.Deserialize<Dictionary<string, float[]>>(
                 Utils.GetStringResource("den_locations_kitakami.json") ?? "{}"
             );
 
-            var configpath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "config.json");
-            if (File.Exists(configpath))
+            var configPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "config.json");
+            if (File.Exists(configPath))
             {
-                var text = File.ReadAllText(configpath);
+                var text = File.ReadAllText(configPath);
                 Config = JsonSerializer.Deserialize<ClientConfig>(text)!;
             }
             else
                 Config = new();
 
-            formTitle =
-                "RaidCrawler v"
-                + v.Major
-                + "."
-                + v.Minor
-                + "."
-                + v.Build
-                + build
-                + " "
-                + Config.InstanceName;
+            formTitle = $"RaidCrawler v{v.Major}.{v.Minor}.{v.Build}{build} {Config.InstanceName}";
             Text = formTitle;
 
             // load raids
@@ -653,7 +644,7 @@ namespace RaidCrawler.WinForms
                     {
                         return RaidBoost.SelectedIndex;
                     });
-                    var satisfied_filters =
+                    var satisfiedFilters =
                         new List<(RaidFilter, ITeraRaid, Raid, IReadOnlyList<(int, int, int)>)>();
                     for (int i = 0; i < raids.Count; i++)
                     {
@@ -671,7 +662,7 @@ namespace RaidCrawler.WinForms
                                 )
                             )
                             {
-                                satisfied_filters.Add(
+                                satisfiedFilters.Add(
                                     (filter, encounters[i], raids[i], rewards[i])
                                 );
                                 if (InvokeRequired)
@@ -687,7 +678,7 @@ namespace RaidCrawler.WinForms
 
                     if (Config.EnableNotification)
                     {
-                        foreach (var satisfied in satisfied_filters)
+                        foreach (var satisfied in satisfiedFilters)
                         {
                             var teraType = satisfied.Item3.GetTeraType(satisfied.Item2);
                             var color = TypeColor.GetTypeSpriteColor((byte)teraType);
@@ -718,7 +709,7 @@ namespace RaidCrawler.WinForms
                     }
 
                     // Save game on match.
-                    if (Config.SaveOnMatch && satisfied_filters.Count > 0)
+                    if (Config.SaveOnMatch && satisfiedFilters.Count > 0)
                         await ConnectionWrapper.SaveGame(Config, token).ConfigureAwait(false);
 
                     if (Config.EnableAlertWindow)
@@ -1045,17 +1036,17 @@ namespace RaidCrawler.WinForms
 
         private async Task ReadEventRaids(CancellationToken token, bool force = false)
         {
-            var prio_file = Path.Combine(
+            var priorityFile = Path.Combine(
                 Directory.GetCurrentDirectory(),
                 "cache",
                 "raid_priority_array"
             );
-            if (!force && File.Exists(prio_file))
+            if (!force && File.Exists(priorityFile))
             {
                 (_, var version) = FlatbufferDumper.DumpDeliveryPriorities(
-                    File.ReadAllBytes(prio_file)
+                    File.ReadAllBytes(priorityFile)
                 );
-                var blk = await ConnectionWrapper
+                var block = await ConnectionWrapper
                     .ReadBlockDefault(
                         BCATRaidPriorityLocation,
                         "raid_priority_array.tmp",
@@ -1063,35 +1054,35 @@ namespace RaidCrawler.WinForms
                         token
                     )
                     .ConfigureAwait(false);
-                (_, var v2) = FlatbufferDumper.DumpDeliveryPriorities(blk);
+                (_, var v2) = FlatbufferDumper.DumpDeliveryPriorities(block);
                 if (version != v2)
                     force = true;
 
-                var tmp_file = Path.Combine(
+                var tempFile = Path.Combine(
                     Directory.GetCurrentDirectory(),
                     "cache",
                     "raid_priority_array.tmp"
                 );
-                if (File.Exists(tmp_file))
-                    File.Delete(tmp_file);
+                if (File.Exists(tempFile))
+                    File.Delete(tempFile);
 
                 if (v2 == 0) // raid reset
                     return;
             }
 
-            var delivery_raid_prio = await ConnectionWrapper
+            var deliveryRaidPriorityFlatbuffer = await ConnectionWrapper
                 .ReadBlockDefault(BCATRaidPriorityLocation, "raid_priority_array", force, token)
                 .ConfigureAwait(false);
-            (var group_id, var priority) = FlatbufferDumper.DumpDeliveryPriorities(
-                delivery_raid_prio
+            (var groupID, var priority) = FlatbufferDumper.DumpDeliveryPriorities(
+                deliveryRaidPriorityFlatbuffer
             );
             if (priority == 0)
                 return;
 
-            var delivery_raid_fbs = await ConnectionWrapper
+            var deliveryRaidFlatbuffer = await ConnectionWrapper
                 .ReadBlockDefault(BCATRaidBinaryLocation, "raid_enemy_array", force, token)
                 .ConfigureAwait(false);
-            var delivery_fixed_rewards = await ConnectionWrapper
+            var deliveryFixedRewardFlatbuffer = await ConnectionWrapper
                 .ReadBlockDefault(
                     BCATRaidFixedRewardLocation,
                     "fixed_reward_item_array",
@@ -1099,7 +1090,7 @@ namespace RaidCrawler.WinForms
                     token
                 )
                 .ConfigureAwait(false);
-            var delivery_lottery_rewards = await ConnectionWrapper
+            var deliveryLotteryRewardFlatbuffer = await ConnectionWrapper
                 .ReadBlockDefault(
                     BCATRaidLotteryRewardLocation,
                     "lottery_reward_item_array",
@@ -1108,14 +1099,14 @@ namespace RaidCrawler.WinForms
                 )
                 .ConfigureAwait(false);
 
-            RaidContainer.DistTeraRaids = TeraDistribution.GetAllEncounters(delivery_raid_fbs);
-            RaidContainer.MightTeraRaids = TeraMight.GetAllEncounters(delivery_raid_fbs);
-            RaidContainer.DeliveryRaidPriority = group_id;
+            RaidContainer.DistTeraRaids = TeraDistribution.GetAllEncounters(deliveryRaidFlatbuffer);
+            RaidContainer.MightTeraRaids = TeraMight.GetAllEncounters(deliveryRaidFlatbuffer);
+            RaidContainer.DeliveryRaidPriority = groupID;
             RaidContainer.DeliveryRaidFixedRewards = FlatbufferDumper.DumpFixedRewards(
-                delivery_fixed_rewards
+                deliveryFixedRewardFlatbuffer
             );
             RaidContainer.DeliveryRaidLotteryRewards = FlatbufferDumper.DumpLotteryRewards(
-                delivery_lottery_rewards
+                deliveryLotteryRewardFlatbuffer
             );
         }
 
@@ -1135,23 +1126,23 @@ namespace RaidCrawler.WinForms
                     $"{Areas.GetArea((int)(raid.Area - 1), raid.MapParent)} - Den {raid.Den}";
                 labelEvent.Visible = raid.IsEvent;
 
-                var teratype = raid.GetTeraType(encounter);
-                TeraType.Text = RaidContainer.Strings.types[teratype];
+                var teraType = raid.GetTeraType(encounter);
+                TeraType.Text = RaidContainer.Strings.types[teraType];
 
-                int StarCount = encounter switch
+                int starCount = encounter switch
                 {
                     TeraDistribution => encounter.Stars,
                     TeraMight => encounter.Stars,
                     _ => raid.GetStarCount(raid.Difficulty, Config.Progress, raid.IsBlack)
                 };
-                Difficulty.Text = string.Concat(Enumerable.Repeat("☆", StarCount));
+                Difficulty.Text = string.Concat(Enumerable.Repeat("☆", starCount));
 
                 var param = encounter.GetParam();
                 var blank = new PK9 { Species = encounter.Species, Form = encounter.Form };
 
                 Encounter9RNG.GenerateData(blank, param, EncounterCriteria.Unrestricted, raid.Seed);
                 var img = blank.Sprite();
-                img = ApplyTeraColor((byte)teratype, img, SpriteBackgroundType.BottomStripe);
+                img = ApplyTeraColor((byte)teraType, img, SpriteBackgroundType.BottomStripe);
 
                 var form = ShowdownParsing.GetStringFromForm(
                     encounter.Form,
@@ -1164,31 +1155,31 @@ namespace RaidCrawler.WinForms
 
                 Species.Text = $"{RaidContainer.Strings.Species[encounter.Species]}{form}";
                 Sprite.Image = img;
-                GemIcon.Image = GetDisplayGemImage(teratype, raid);
+                GemIcon.Image = GetDisplayGemImage(teraType, raid);
                 Gender.Text = $"{(Gender)blank.Gender}";
 
                 var nature = blank.Nature;
                 Nature.Text = $"{RaidContainer.Strings.Natures[nature]}";
                 Ability.Text = $"{RaidContainer.Strings.Ability[blank.Ability]}";
 
-                var extra_moves = new ushort[] { 0, 0, 0, 0 };
+                var extraMoves = new ushort[] { 0, 0, 0, 0 };
                 for (int i = 0; i < encounter.ExtraMoves.Length; i++)
                 {
-                    if (i < extra_moves.Length)
-                        extra_moves[i] = encounter.ExtraMoves[i];
+                    if (i < extraMoves.Length)
+                        extraMoves[i] = encounter.ExtraMoves[i];
                 }
 
                 Move1.Text = ShowExtraMoves
-                    ? RaidContainer.Strings.Move[extra_moves[0]]
+                    ? RaidContainer.Strings.Move[extraMoves[0]]
                     : RaidContainer.Strings.Move[encounter.Move1];
                 Move2.Text = ShowExtraMoves
-                    ? RaidContainer.Strings.Move[extra_moves[1]]
+                    ? RaidContainer.Strings.Move[extraMoves[1]]
                     : RaidContainer.Strings.Move[encounter.Move2];
                 Move3.Text = ShowExtraMoves
-                    ? RaidContainer.Strings.Move[extra_moves[2]]
+                    ? RaidContainer.Strings.Move[extraMoves[2]]
                     : RaidContainer.Strings.Move[encounter.Move3];
                 Move4.Text = ShowExtraMoves
-                    ? RaidContainer.Strings.Move[extra_moves[3]]
+                    ? RaidContainer.Strings.Move[extraMoves[3]]
                     : RaidContainer.Strings.Move[encounter.Move4];
 
                 IVs.Text = IVsString(Utils.ToSpeedLast(blank.IVs));
@@ -1212,8 +1203,8 @@ namespace RaidCrawler.WinForms
 
         private static Image? GetDisplayGemImage(int teratype, Raid raid)
         {
-            var display_black = raid.IsBlack || raid.Flags == 3;
-            var baseImg = display_black
+            var shouldDisplayBlack = raid.IsBlack || raid.Flags == 3;
+            var baseImg = shouldDisplayBlack
                 ? (Image?)Properties.Resources.ResourceManager.GetObject($"black_{teratype:D2}")
                 : (Image?)Properties.Resources.ResourceManager.GetObject($"gem_{teratype:D2}");
             if (baseImg is null)
@@ -1242,7 +1233,7 @@ namespace RaidCrawler.WinForms
                 baseImg.Height,
                 baseImg.PixelFormat
             );
-            if (display_black)
+            if (shouldDisplayBlack)
             {
                 var color = Color.Indigo;
                 SpriteUtil.GetSpriteGlow(baseImg, color.B, color.G, color.R, out var glow, false);
@@ -1296,9 +1287,9 @@ namespace RaidCrawler.WinForms
                 teraRaidView.Area.Text =
                     $"{Areas.GetArea((int)(raid.Area - 1), raid.MapParent)} - Den {raid.Den}";
 
-                var teratype = raid.GetTeraType(encounter);
+                var teraType = raid.GetTeraType(encounter);
                 teraRaidView.TeraType.Image = (Bitmap)
-                    Properties.Resources.ResourceManager.GetObject("gem_text_" + teratype)!;
+                    Properties.Resources.ResourceManager.GetObject($"gem_text_{teraType}")!;
 
                 int StarCount = encounter switch
                 {
@@ -1335,18 +1326,18 @@ namespace RaidCrawler.WinForms
                     encounter.Move4 > 0 ? RaidContainer.Strings.Move[encounter.Move4] : "---";
 
                 var length = encounter.ExtraMoves.Length < 4 ? 4 : encounter.ExtraMoves.Length;
-                var extra_moves = new ushort[length];
+                var extraMoves = new ushort[length];
                 for (int i = 0; i < encounter.ExtraMoves.Length; i++)
-                    extra_moves[i] = encounter.ExtraMoves[i];
+                    extraMoves[i] = encounter.ExtraMoves[i];
 
                 teraRaidView.Move5.Text =
-                    extra_moves[0] > 0 ? RaidContainer.Strings.Move[extra_moves[0]] : "---";
+                    extraMoves[0] > 0 ? RaidContainer.Strings.Move[extraMoves[0]] : "---";
                 teraRaidView.Move6.Text =
-                    extra_moves[1] > 0 ? RaidContainer.Strings.Move[extra_moves[1]] : "---";
+                    extraMoves[1] > 0 ? RaidContainer.Strings.Move[extraMoves[1]] : "---";
                 teraRaidView.Move7.Text =
-                    extra_moves[2] > 0 ? RaidContainer.Strings.Move[extra_moves[2]] : "---";
+                    extraMoves[2] > 0 ? RaidContainer.Strings.Move[extraMoves[2]] : "---";
                 teraRaidView.Move8.Text =
-                    extra_moves[3] > 0 ? RaidContainer.Strings.Move[extra_moves[3]] : "---";
+                    extraMoves[3] > 0 ? RaidContainer.Strings.Move[extraMoves[3]] : "---";
 
                 var ivs = Utils.ToSpeedLast(blank.IVs);
 
@@ -1398,7 +1389,7 @@ namespace RaidCrawler.WinForms
                 else if (teraRaidView.SPEED.Text is "00")
                     teraRaidView.SPEED.BackColor = Color.DarkRed;
 
-                var map = GenerateMap(raid, teratype);
+                var map = GenerateMap(raid, teraType);
                 if (map is null)
                     Task.Run(
                         async () =>
@@ -1626,20 +1617,20 @@ namespace RaidCrawler.WinForms
                 0
             );
             if (
-                den_locations_base is null
-                || den_locations_base.Count == 0
-                || den_locations_kitakami is null
-                || den_locations_kitakami.Count == 0
+                DenLocationsBase is null
+                || DenLocationsBase.Count == 0
+                || DenLocationsKitakami is null
+                || DenLocationsKitakami.Count == 0
             )
                 return null;
 
             double x,
                 y;
-            var loc_data =
+            var locData =
                 raid.MapParent == TeraRaidMapParent.Paldea
-                    ? den_locations_base
-                    : den_locations_kitakami;
-            var map = raid.MapParent == TeraRaidMapParent.Paldea ? map_base : map_kitakami;
+                    ? DenLocationsBase
+                    : DenLocationsKitakami;
+            var map = raid.MapParent == TeraRaidMapParent.Paldea ? MapBase : MapKitakami;
             try
             {
                 x =
@@ -1649,7 +1640,7 @@ namespace RaidCrawler.WinForms
                                 raid.MapParent == TeraRaidMapParent.Paldea
                                     ? 1
                                     : 2.766970605475146
-                            ) * loc_data[$"{raid.Area}-{raid.DisplayType}-{raid.Den}"][0]
+                            ) * locData[$"{raid.Area}-{raid.DisplayType}-{raid.Den}"][0]
                         )
                         + (
                             raid.MapParent == TeraRaidMapParent.Paldea
@@ -1666,7 +1657,7 @@ namespace RaidCrawler.WinForms
                                 raid.MapParent == TeraRaidMapParent.Paldea
                                     ? 1
                                     : 2.5700782642623805
-                            ) * loc_data[$"{raid.Area}-{raid.DisplayType}-{raid.Den}"][2]
+                            ) * locData[$"{raid.Area}-{raid.DisplayType}-{raid.Den}"][2]
                         )
                         + (
                             raid.MapParent == TeraRaidMapParent.Paldea
@@ -1688,10 +1679,10 @@ namespace RaidCrawler.WinForms
         {
             var raids = RaidContainer.Raids;
             var curSeeds = raids.Select(x => x.Seed).ToArray();
-            var sameraids = curSeeds.Except(previousSeeds).ToArray().Length == 0;
+            var didRaidsChange = curSeeds.Except(previousSeeds).ToArray().Length == 0;
 
             StatDaySkipTries++;
-            if (sameraids)
+            if (didRaidsChange)
                 return false;
 
             StatDaySkipSuccess++;
@@ -1749,9 +1740,20 @@ namespace RaidCrawler.WinForms
             {
                 UpdateStatus("Reading Paldea raid block...");
                 data = await ConnectionWrapper.Connection
-                    .ReadBytesAbsoluteAsync(RaidBlockOffsetBase + RaidBlock.HEADER_SIZE, (int)(RaidBlock.SIZE_BASE - RaidBlock.HEADER_SIZE), token).ConfigureAwait(false);
+                    .ReadBytesAbsoluteAsync(
+                        RaidBlockOffsetBase + RaidBlock.HEADER_SIZE,
+                        (int)RaidBlock.SIZE_BASE,
+                        token
+                    )
+                    .ConfigureAwait(false);
 
-                (delivery, enc) = RaidContainer.ReadAllRaids(data, Config.Progress, Config.EventProgress, GetRaidBoost(), TeraRaidMapParent.Paldea);
+                (delivery, enc) = RaidContainer.ReadAllRaids(
+                    data,
+                    Config.Progress,
+                    Config.EventProgress,
+                    GetRaidBoost(),
+                    TeraRaidMapParent.Paldea
+                );
                 if (enc > 0)
                     msg += $"Failed to find encounters for {enc} raid(s).\n";
 
@@ -1761,7 +1763,7 @@ namespace RaidCrawler.WinForms
 
                 if (msg != string.Empty)
                 {
-                    msg += "\nMore info can be found in the \"raid_dbg.txt\" file.";
+                    msg += $"\nMore info can be found in the \"raid_dbg_{TeraRaidMapParent.Paldea}.txt\" file.";
                     await ErrorHandler
                         .DisplayMessageBox(this, Webhook, msg, token, "Raid Read Error")
                         .ConfigureAwait(false);
@@ -1804,7 +1806,7 @@ namespace RaidCrawler.WinForms
 
                 if (msg != string.Empty)
                 {
-                    msg += "\nMore info can be found in the \"raid_dbg.txt\" file.";
+                    msg += $"\nMore info can be found in the \"raid_dbg_{TeraRaidMapParent.Kitakami}.txt\" file.";
                     await ErrorHandler
                         .DisplayMessageBox(this, Webhook, msg, token, "Raid Read Error")
                         .ConfigureAwait(false);
@@ -1950,8 +1952,8 @@ namespace RaidCrawler.WinForms
 
             var raid = raids[ComboIndex.SelectedIndex];
             var encounter = RaidContainer.Encounters[ComboIndex.SelectedIndex];
-            var teratype = raid.GetTeraType(encounter);
-            var map = GenerateMap(raid, teratype);
+            var teraType = raid.GetTeraType(encounter);
+            var map = GenerateMap(raid, teraType);
             if (map is null)
             {
                 Task.Run(
@@ -2050,21 +2052,21 @@ namespace RaidCrawler.WinForms
             );
 
             var length = encounter.ExtraMoves.Length < 4 ? 4 : encounter.ExtraMoves.Length;
-            var extra_moves = new ushort[length];
+            var extraMoves = new ushort[length];
             for (int i = 0; i < encounter.ExtraMoves.Length; i++)
-                extra_moves[i] = encounter.ExtraMoves[i];
+                extraMoves[i] = encounter.ExtraMoves[i];
 
             Move1.Text = ShowExtraMoves
-                ? RaidContainer.Strings.Move[extra_moves[0]]
+                ? RaidContainer.Strings.Move[extraMoves[0]]
                 : RaidContainer.Strings.Move[encounter.Move1];
             Move2.Text = ShowExtraMoves
-                ? RaidContainer.Strings.Move[extra_moves[1]]
+                ? RaidContainer.Strings.Move[extraMoves[1]]
                 : RaidContainer.Strings.Move[encounter.Move2];
             Move3.Text = ShowExtraMoves
-                ? RaidContainer.Strings.Move[extra_moves[2]]
+                ? RaidContainer.Strings.Move[extraMoves[2]]
                 : RaidContainer.Strings.Move[encounter.Move3];
             Move4.Text = ShowExtraMoves
-                ? RaidContainer.Strings.Move[extra_moves[3]]
+                ? RaidContainer.Strings.Move[extraMoves[3]]
                 : RaidContainer.Strings.Move[encounter.Move4];
         }
 
@@ -2119,7 +2121,7 @@ namespace RaidCrawler.WinForms
                 timeSpan.Seconds
             );
 
-            Invoke(() => Text = formTitle + " [Searching for " + time + "]");
+            Invoke(() => Text = $"{formTitle} [Searching for {time}]");
             if (Config.StreamerView && teraRaidView is not null)
                 Invoke(() => teraRaidView.textSearchTime.Text = time);
         }
@@ -2200,7 +2202,7 @@ namespace RaidCrawler.WinForms
             if (Config.StreamerView)
             {
                 teraRaidView = new();
-                teraRaidView.Map.Image = map_base;
+                teraRaidView.Map.Image = MapBase;
                 teraRaidView.Show();
             }
             else if (!Config.StreamerView && teraRaidView is not null)
