@@ -20,7 +20,10 @@ namespace RaidCrawler.Core.Connection
         public async Task DaySkip2(CancellationToken token) => await Connection.SendAsync(Encode($"daySkip2", true), token).ConfigureAwait(false);
 
         public readonly ISwitchConnectionAsync Connection;
-        public bool Connected { get => Connection is not null && IsConnected; }
+        public bool Connected
+        {
+            get => Connection is not null && IsConnected;
+        }
         private bool IsConnected { get; set; }
         private readonly bool CRLF;
         private readonly Action<string> _statusUpdate;
@@ -47,7 +50,9 @@ namespace RaidCrawler.Core.Connection
             {
                 _statusUpdate("Connecting...");
                 Connection.Connect();
-                BaseBlockKeyPointer = await Connection.PointerAll(BlockKeyPointer, token).ConfigureAwait(false);
+                BaseBlockKeyPointer = await Connection
+                    .PointerAll(BlockKeyPointer, token)
+                    .ConfigureAwait(false);
                 IsConnected = true;
                 _statusUpdate("Connected!");
                 return (true, "");
@@ -67,7 +72,9 @@ namespace RaidCrawler.Core.Connection
             try
             {
                 _statusUpdate("Disconnecting controller...");
-                await Connection.SendAsync(SwitchCommand.DetachController(CRLF), token).ConfigureAwait(false);
+                await Connection
+                    .SendAsync(SwitchCommand.DetachController(CRLF), token)
+                    .ConfigureAwait(false);
 
                 _statusUpdate("Disconnecting...");
                 Connection.Disconnect();
@@ -97,28 +104,43 @@ namespace RaidCrawler.Core.Connection
         private async Task<byte[]> ReadSaveBlock(uint key, int size, CancellationToken token)
         {
             var block_ofs = await SearchSaveKey(key, token).ConfigureAwait(false);
-            var data = await Connection.ReadBytesAbsoluteAsync(block_ofs + 8, 0x8, token).ConfigureAwait(false);
+            var data = await Connection
+                .ReadBytesAbsoluteAsync(block_ofs + 8, 0x8, token)
+                .ConfigureAwait(false);
             block_ofs = BitConverter.ToUInt64(data, 0);
 
-            var block = await Connection.ReadBytesAbsoluteAsync(block_ofs, size, token).ConfigureAwait(false);
+            var block = await Connection
+                .ReadBytesAbsoluteAsync(block_ofs, size, token)
+                .ConfigureAwait(false);
             return DecryptBlock(key, block);
         }
 
         private async Task<byte[]> ReadSaveBlockObject(uint key, CancellationToken token)
         {
             var header_ofs = await SearchSaveKey(key, token).ConfigureAwait(false);
-            var data = await Connection.ReadBytesAbsoluteAsync(header_ofs + 8, 8, token).ConfigureAwait(false);
+            var data = await Connection
+                .ReadBytesAbsoluteAsync(header_ofs + 8, 8, token)
+                .ConfigureAwait(false);
             header_ofs = BitConverter.ToUInt64(data);
 
-            var header = await Connection.ReadBytesAbsoluteAsync(header_ofs, 5, token).ConfigureAwait(false);
+            var header = await Connection
+                .ReadBytesAbsoluteAsync(header_ofs, 5, token)
+                .ConfigureAwait(false);
             header = DecryptBlock(key, header);
 
             var size = BitConverter.ToUInt32(header.AsSpan()[1..]);
-            var obj = await Connection.ReadBytesAbsoluteAsync(header_ofs, (int)size + 5, token).ConfigureAwait(false);
+            var obj = await Connection
+                .ReadBytesAbsoluteAsync(header_ofs, (int)size + 5, token)
+                .ConfigureAwait(false);
             return DecryptBlock(key, obj)[5..];
         }
 
-        public async Task<byte[]> ReadBlockDefault(uint key, string? cache, bool force, CancellationToken token)
+        public async Task<byte[]> ReadBlockDefault(
+            uint key,
+            string? cache,
+            bool force,
+            CancellationToken token
+        )
         {
             var folder = Path.Combine(Directory.GetCurrentDirectory(), "cache");
             Directory.CreateDirectory(folder);
@@ -134,7 +156,9 @@ namespace RaidCrawler.Core.Connection
 
         private async Task<ulong> SearchSaveKey(uint key, CancellationToken token)
         {
-            var data = await Connection.ReadBytesAbsoluteAsync(BaseBlockKeyPointer + 8, 16, token).ConfigureAwait(false);
+            var data = await Connection
+                .ReadBytesAbsoluteAsync(BaseBlockKeyPointer + 8, 16, token)
+                .ConfigureAwait(false);
             var start = BitConverter.ToUInt64(data.AsSpan()[..8]);
             var end = BitConverter.ToUInt64(data.AsSpan()[8..]);
 
@@ -150,7 +174,8 @@ namespace RaidCrawler.Core.Connection
 
                 if (found >= key)
                     end = mid;
-                else start = mid + 48;
+                else
+                    start = mid + 48;
             }
             return start;
         }
@@ -165,26 +190,46 @@ namespace RaidCrawler.Core.Connection
 
         private async Task Click(SwitchButton button, int delay, CancellationToken token)
         {
-            await Connection.SendAsync(SwitchCommand.Click(button, CRLF), token).ConfigureAwait(false);
+            await Connection
+                .SendAsync(SwitchCommand.Click(button, CRLF), token)
+                .ConfigureAwait(false);
             await Task.Delay(delay, token).ConfigureAwait(false);
         }
 
         private async Task Touch(int x, int y, int hold, int delay, CancellationToken token)
         {
-            var command = Encoding.ASCII.GetBytes($"touchHold {x} {y} {hold}{(CRLF ? "\r\n" : "")}");
+            var command = Encoding.ASCII.GetBytes(
+                $"touchHold {x} {y} {hold}{(CRLF ? "\r\n" : "")}"
+            );
             await Connection.SendAsync(command, token).ConfigureAwait(false);
             await Task.Delay(delay, token).ConfigureAwait(false);
         }
 
-        private async Task SetStick(SwitchStick stick, short x, short y, int hold, int delay, CancellationToken token)
+        private async Task SetStick(
+            SwitchStick stick,
+            short x,
+            short y,
+            int hold,
+            int delay,
+            CancellationToken token
+        )
         {
-            await Connection.SendAsync(SwitchCommand.SetStick(stick, x, y, CRLF), token).ConfigureAwait(false);
+            await Connection
+                .SendAsync(SwitchCommand.SetStick(stick, x, y, CRLF), token)
+                .ConfigureAwait(false);
             await Task.Delay(hold, token).ConfigureAwait(false);
-            await Connection.SendAsync(SwitchCommand.SetStick(stick, 0, 0, CRLF), token).ConfigureAwait(false);
+            await Connection
+                .SendAsync(SwitchCommand.SetStick(stick, 0, 0, CRLF), token)
+                .ConfigureAwait(false);
             await Task.Delay(delay, token).ConfigureAwait(false);
         }
 
-        private async Task PressAndHold(SwitchButton b, int hold, int delay, CancellationToken token)
+        private async Task PressAndHold(
+            SwitchButton b,
+            int hold,
+            int delay,
+            CancellationToken token
+        )
         {
             await Connection.SendAsync(SwitchCommand.Hold(b, CRLF), token).ConfigureAwait(false);
             await Task.Delay(hold, token).ConfigureAwait(false);
@@ -232,7 +277,7 @@ namespace RaidCrawler.Core.Connection
             _statusUpdate("Closed out of the game!");
         }
 
-        public async Task StartGame(CancellationToken token)
+        public async Task StartGame(IDateAdvanceConfig config, CancellationToken token)
         {
             // Open game.
             _statusUpdate("Starting the game!");
@@ -258,8 +303,13 @@ namespace RaidCrawler.Core.Connection
             for (int i = 0; i < 40; i++)
                 await Click(A, 500, token).ConfigureAwait(false);
 
+            // Particularly slow switches need more time to load the overworld
+            await Task.Delay(config.ExtraOverworldWait, token).ConfigureAwait(false);
+
             _statusUpdate("Back in the overworld! Refreshing the base block key pointer...");
-            BaseBlockKeyPointer = await Connection.PointerAll(BlockKeyPointer, token).ConfigureAwait(false);
+            BaseBlockKeyPointer = await Connection
+                .PointerAll(BlockKeyPointer, token)
+                .ConfigureAwait(false);
         }
 
         public async Task SaveGame(IDateAdvanceConfig config, CancellationToken token)

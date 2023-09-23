@@ -42,7 +42,6 @@ namespace RaidCrawler.WinForms.SubForms
             DodgeSystemUpdate.Checked = c.DodgeSystemUpdate;
             UseSetStick.Checked = c.UseSetStick;
 
-            TimeSetDelay.Value = c.TimeSetDelay;
             OpenHome.Value = c.OpenHomeDelay;
             NavigateToSettings.Value = c.NavigateToSettingsDelay;
             OpenSettings.Value = c.OpenSettingsDelay;
@@ -56,6 +55,11 @@ namespace RaidCrawler.WinForms.SubForms
             ReturnGame.Value = c.ReturnGameDelay;
             BaseDelay.Value = c.BaseDelay;
             SaveGameDelay.Value = c.SaveGameDelay;
+            SystemReset.Value = c.SystemReset;
+            RelaunchDelay.Value = c.RelaunchDelay;
+            ExtraOverworldWait.Value = c.ExtraOverworldWait;
+            PaldeaScanCheck.Checked = c.PaldeaScan;
+            KitakamiScanCheck.Checked = c.KitakamiScan;
 
             SystemDDownPresses.Enabled = !UseOvershoot.Checked;
             SystemOvershoot.Enabled = UseOvershoot.Checked;
@@ -70,13 +74,16 @@ namespace RaidCrawler.WinForms.SubForms
 
             ExperimentalView.Checked = c.StreamerView;
 
-            labelAppVersion.Text = "v" + v.Major + "." + v.Minor + "." + v.Build + "-" + shaField?.GetValue(null);
+            labelAppVersion.Text =
+                "v" + v.Major + "." + v.Minor + "." + v.Build + "-" + shaField?.GetValue(null);
             labelAppVersion.Left = (tabAbout.Width - labelAppVersion.Width) / 2;
-            labelAppName.Left = ((tabAbout.Width - labelAppName.Width) / 2) + (picAppIcon.Width / 2) + 2;
+            labelAppName.Left =
+                ((tabAbout.Width - labelAppName.Width) / 2) + (picAppIcon.Width / 2) + 2;
             picAppIcon.Left = labelAppName.Left - picAppIcon.Width - 2;
             linkLabel1.Left = (tabAbout.Width - linkLabel1.Width) / 2;
 
-            labelWebhooks.Text = "Webhooks are " + (DiscordWebhook.Enabled ? "enabled." : "disabled.");
+            labelWebhooks.Text =
+                "Webhooks are " + (DiscordWebhook.Enabled ? "enabled." : "disabled.");
         }
 
         private void EnableAlert_CheckedChanged(object sender, EventArgs e)
@@ -88,7 +95,8 @@ namespace RaidCrawler.WinForms.SubForms
         {
             DiscordWebhook.Enabled = EnableDiscordNotifications.Checked;
             DiscordMessageContent.Enabled = EnableDiscordNotifications.Checked;
-            labelWebhooks.Text = "Webhooks are " + (DiscordWebhook.Enabled ? "enabled." : "disabled.");
+            labelWebhooks.Text =
+                "Webhooks are " + (DiscordWebhook.Enabled ? "enabled." : "disabled.");
         }
 
         private void Config_Closing(object sender, EventArgs e)
@@ -111,13 +119,13 @@ namespace RaidCrawler.WinForms.SubForms
             c.DodgeSystemUpdate = DodgeSystemUpdate.Checked;
             c.UseSetStick = UseSetStick.Checked;
 
-            c.TimeSetDelay = (int)TimeSetDelay.Value;
             c.OpenHomeDelay = (int)OpenHome.Value;
             c.NavigateToSettingsDelay = (int)NavigateToSettings.Value;
             c.OpenSettingsDelay = (int)OpenSettings.Value;
             c.HoldDuration = (int)Hold.Value;
             c.SystemDownPresses = (int)SystemDDownPresses.Value;
             c.SystemOvershoot = (int)SystemOvershoot.Value;
+            c.SystemReset = (int)SystemReset.Value;
             c.Submenu = (int)Submenu.Value;
             c.DateChange = (int)DateChange.Value;
             c.DaysToSkip = (int)DaysToSkip.Value;
@@ -125,6 +133,10 @@ namespace RaidCrawler.WinForms.SubForms
             c.ReturnGameDelay = (int)ReturnGame.Value;
             c.BaseDelay = (int)BaseDelay.Value;
             c.SaveGameDelay = (int)SaveGameDelay.Value;
+            c.RelaunchDelay = (int)RelaunchDelay.Value;
+            c.ExtraOverworldWait = (int)ExtraOverworldWait.Value;
+            c.PaldeaScan = PaldeaScanCheck.Checked;
+            c.KitakamiScan = KitakamiScanCheck.Checked;
 
             c.IVsStyle = IVstyle.SelectedIndex;
             c.VerboseIVs = IVverbose.Checked;
@@ -138,7 +150,8 @@ namespace RaidCrawler.WinForms.SubForms
 
             JsonSerializerOptions options = new() { WriteIndented = true };
             string output = JsonSerializer.Serialize(c, options);
-            using StreamWriter sw = new(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "config.json"));
+            using StreamWriter sw =
+                new(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "config.json"));
             sw.Write(output);
         }
 
@@ -173,7 +186,12 @@ namespace RaidCrawler.WinForms.SubForms
 
         private void LinkLabel1_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-            System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(((LinkLabel)sender).Text) { UseShellExecute = true });
+            System.Diagnostics.Process.Start(
+                new System.Diagnostics.ProcessStartInfo(((LinkLabel)sender).Text)
+                {
+                    UseShellExecute = true
+                }
+            );
         }
 
         private void Game_SelectedIndexChanged(object sender, EventArgs e)
