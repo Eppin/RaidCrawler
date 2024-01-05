@@ -24,6 +24,7 @@ public class ClientConfig : IDateAdvanceConfig, IWebhookConfig
     public string AlertWindowMessage { get; set; } =
         "Match found! Hold Shift and click one of the arrow keys to jump to the matching result.";
     public bool EnableNotification { get; set; }
+    public string DiscordLoggingWebhook { get; set; } = string.Empty;
     public string DiscordWebhook { get; set; } = string.Empty;
     public string DiscordMessageContent { get; set; } = string.Empty;
 
@@ -36,6 +37,7 @@ public class ClientConfig : IDateAdvanceConfig, IWebhookConfig
     public bool UseSetStick { get; set; }
     public bool UseMapTrick { get; set; }
 
+    public int TimeSetDelay { get; set; } = 2_000;
     public int OpenHomeDelay { get; set; } = 1_800;
     public int NavigateToSettingsDelay { get; set; } = 0_100;
     public int OpenSettingsDelay { get; set; } = 1_000;

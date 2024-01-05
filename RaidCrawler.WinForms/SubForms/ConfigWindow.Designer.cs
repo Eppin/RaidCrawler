@@ -66,10 +66,13 @@ namespace RaidCrawler.WinForms.SubForms
             tabControl1 = new TabControl();
             tabGeneral = new TabPage();
             LocationGroup = new GroupBox();
+            BlueberryScanCheck = new CheckBox();
             KitakamiScanCheck = new CheckBox();
             PaldeaScanCheck = new CheckBox();
             Protocol_dropdown = new ComboBox();
             Protocol_label = new Label();
+            LabelDiscordLoggingWebhook = new Label();
+            DiscordLoggingWebhook = new TextBox();
             label23 = new Label();
             LabelEventProgress = new Label();
             EventProgress = new ComboBox();
@@ -118,7 +121,6 @@ namespace RaidCrawler.WinForms.SubForms
             labelAppName = new Label();
             picAppIcon = new PictureBox();
             labelAppVersion = new Label();
-            BlueberryScanCheck = new CheckBox();
             ((System.ComponentModel.ISupportInitialize)SystemDDownPresses).BeginInit();
             ((System.ComponentModel.ISupportInitialize)NavigateToSettings).BeginInit();
             ((System.ComponentModel.ISupportInitialize)OpenSettings).BeginInit();
@@ -461,6 +463,8 @@ namespace RaidCrawler.WinForms.SubForms
             tabGeneral.Controls.Add(LocationGroup);
             tabGeneral.Controls.Add(Protocol_dropdown);
             tabGeneral.Controls.Add(Protocol_label);
+            tabGeneral.Controls.Add(LabelDiscordLoggingWebhook);
+            tabGeneral.Controls.Add(DiscordLoggingWebhook);
             tabGeneral.Controls.Add(label23);
             tabGeneral.Controls.Add(LabelEventProgress);
             tabGeneral.Controls.Add(EventProgress);
@@ -487,6 +491,18 @@ namespace RaidCrawler.WinForms.SubForms
             LocationGroup.TabIndex = 115;
             LocationGroup.TabStop = false;
             LocationGroup.Text = "Scan Locations";
+            // 
+            // BlueberryScanCheck
+            // 
+            BlueberryScanCheck.AutoSize = true;
+            BlueberryScanCheck.Checked = true;
+            BlueberryScanCheck.CheckState = CheckState.Checked;
+            BlueberryScanCheck.Location = new Point(6, 72);
+            BlueberryScanCheck.Name = "BlueberryScanCheck";
+            BlueberryScanCheck.Size = new Size(76, 19);
+            BlueberryScanCheck.TabIndex = 114;
+            BlueberryScanCheck.Text = "Blueberry";
+            BlueberryScanCheck.UseVisualStyleBackColor = true;
             // 
             // KitakamiScanCheck
             // 
@@ -532,6 +548,22 @@ namespace RaidCrawler.WinForms.SubForms
             Protocol_label.Size = new Size(120, 15);
             Protocol_label.TabIndex = 110;
             Protocol_label.Text = "Connection Protocol:";
+            // 
+            // LabelDiscordLoggingWebhook
+            // 
+            LabelDiscordLoggingWebhook.AutoSize = true;
+            LabelDiscordLoggingWebhook.Location = new Point(8, 227);
+            LabelDiscordLoggingWebhook.Name = "LabelDiscordLoggingWebhook";
+            LabelDiscordLoggingWebhook.Size = new Size(299, 15);
+            LabelDiscordLoggingWebhook.TabIndex = 112;
+            LabelDiscordLoggingWebhook.Text = "Send logging to Discord webhook (leave empty to skip)";
+            // 
+            // DiscordLoggingWebhook
+            // 
+            DiscordLoggingWebhook.Location = new Point(8, 245);
+            DiscordLoggingWebhook.Name = "DiscordLoggingWebhook";
+            DiscordLoggingWebhook.Size = new Size(357, 23);
+            DiscordLoggingWebhook.TabIndex = 111;
             // 
             // label23
             // 
@@ -673,10 +705,11 @@ namespace RaidCrawler.WinForms.SubForms
             ZyroMethod.AutoSize = true;
             ZyroMethod.Location = new Point(8, 21);
             ZyroMethod.Name = "ZyroMethod";
-            ZyroMethod.Size = new Size(332, 19);
+            ZyroMethod.Size = new Size(284, 19);
             ZyroMethod.TabIndex = 53;
-            ZyroMethod.Text = "Use Zyro's usb-botbase fork methods (approx. 4-5x faster)";
+            ZyroMethod.Text = "Use Eppin's usb-botbase fork methods (very fast)";
             ZyroMethod.UseVisualStyleBackColor = true;
+            ZyroMethod.CheckedChanged += ZyroMethod_CheckedChanged;
             // 
             // UseMapTrick
             // 
@@ -1062,18 +1095,6 @@ namespace RaidCrawler.WinForms.SubForms
             labelAppVersion.Text = "v0.0.0-000000";
             labelAppVersion.TextAlign = ContentAlignment.MiddleCenter;
             // 
-            // BlueberryScanCheck
-            // 
-            BlueberryScanCheck.AutoSize = true;
-            BlueberryScanCheck.Checked = true;
-            BlueberryScanCheck.CheckState = CheckState.Checked;
-            BlueberryScanCheck.Location = new Point(6, 72);
-            BlueberryScanCheck.Name = "BlueberryScanCheck";
-            BlueberryScanCheck.Size = new Size(76, 19);
-            BlueberryScanCheck.TabIndex = 114;
-            BlueberryScanCheck.Text = "Blueberry";
-            BlueberryScanCheck.UseVisualStyleBackColor = true;
-            // 
             // ConfigWindow
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
@@ -1191,6 +1212,8 @@ namespace RaidCrawler.WinForms.SubForms
         private Label LabelStoryProgress;
         private ComboBox StoryProgress;
         private Button EmojiConfig;
+        private TextBox DiscordLoggingWebhook;
+        private Label LabelDiscordLoggingWebhook;
         private ComboBox Protocol_dropdown;
         private Label Protocol_label;
         private NumericUpDown BaseDelay;
