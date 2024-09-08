@@ -1281,6 +1281,5 @@ namespace RaidCrawler.WinForms.SubForms
         private NumericUpDown TimeSetDelay;
         private Label L_TimeSetDelay;
         private Label DiscordLoggingWebhook_label;
-        private TextBox DiscordLoggingWebhook;
     }
 }

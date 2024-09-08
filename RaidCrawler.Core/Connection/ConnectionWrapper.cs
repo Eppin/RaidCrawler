@@ -214,12 +214,6 @@ public class ConnectionWrapperAsync(SwitchConnectionConfig Config, Action<string
 
     private async Task DaySkip(CancellationToken token)
     {
-        var command = Encoding.ASCII.GetBytes($"daySkip2{(CRLF ? "\r\n" : "")}");
-        await Connection.SendAsync(command, token).ConfigureAwait(false);
-    }
-
-    private async Task DaySkip(CancellationToken token)
-    {
         // Write the date of today as date
         var timeToSet = (int)DateTime.UtcNow.Date.Subtract(new DateTime(1970, 1, 1)).TotalSeconds;
 
