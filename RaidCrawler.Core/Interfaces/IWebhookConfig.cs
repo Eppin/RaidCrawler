@@ -10,6 +10,7 @@ public interface IWebhookConfig
     string InstanceName { get; set; }
     string DiscordWebhook { get; set; }
     string DiscordMessageContent { get; set; }
+    string DiscordLoggingWebhook { get; set; }
 
     bool EnableEmoji { get; set; }
     Dictionary<string, string> Emoji { get; set; }

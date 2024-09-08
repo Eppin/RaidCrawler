@@ -222,6 +222,15 @@ public class ConnectionWrapperAsync(SwitchConnectionConfig Config, Action<string
         }
     }
 
+    private async Task DaySkip(CancellationToken token)
+    {
+        // Write the date of today as date
+        var timeToSet = (int)DateTime.UtcNow.Date.Subtract(new DateTime(1970, 1, 1)).TotalSeconds;
+
+        var command = Encoding.ASCII.GetBytes($"dateSet {timeToSet}{(CRLF ? "\r\n" : "")}");
+        await Connection.SendAsync(command, token).ConfigureAwait(false);
+    }
+
     public async Task ResetTime(CancellationToken token)
     {
         var command = Encoding.ASCII.GetBytes($"resetTime{(CRLF ? "\r\n" : "")}");
@@ -271,15 +280,13 @@ public class ConnectionWrapperAsync(SwitchConnectionConfig Config, Action<string
 
         if (config.ZyroMethod)
         {
-            if (skips % 2 == 0)
-            {
-                await SkipHour(24, 0, token).ConfigureAwait(false);
-            }
-            else
-            {
-                await ResetTime(token).ConfigureAwait(false);
-            }
-            await Task.Delay(3_000, token).ConfigureAwait(false);
+            await DaySkip(token).ConfigureAwait(false);
+
+            // Avoid disconnects on emuNAND
+            var later = DateTime.Now.AddMilliseconds(config.TimeSetDelay);
+            StatusUpdate($"Press \"B\" till {later}");
+            while (DateTime.Now <= later)
+                await Click(B, 200, token);
         }
         else
         {

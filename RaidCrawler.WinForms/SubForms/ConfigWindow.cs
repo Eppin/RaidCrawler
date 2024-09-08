@@ -35,6 +35,9 @@ public partial class ConfigWindow : Form
 
         ZyroMethod.Checked = c.ZyroMethod;
 
+        DiscordLoggingWebhook.Text = c.DiscordLoggingWebhook;
+        TimeSetDelay.Value = c.TimeSetDelay;
+
         UseTouch.Checked = c.UseTouch;
         UseOvershoot.Checked = c.UseOvershoot;
         SaveGame.Checked = c.SaveOnMatch;
@@ -85,6 +88,8 @@ public partial class ConfigWindow : Form
 
         labelWebhooks.Text =
             "Webhooks are " + (DiscordWebhook.Enabled ? "enabled." : "disabled.");
+
+        ZyroMethod_CheckedChanged(this, EventArgs.Empty);
     }
 
     private void EnableAlert_CheckedChanged(object sender, EventArgs e)
@@ -113,6 +118,9 @@ public partial class ConfigWindow : Form
         c.DiscordMessageContent = DiscordMessageContent.Text;
 
         c.ZyroMethod = ZyroMethod.Checked;
+
+        c.DiscordLoggingWebhook = DiscordLoggingWebhook.Text;
+        c.TimeSetDelay = (int)TimeSetDelay.Value;
 
         c.UseTouch = UseTouch.Checked;
         c.UseOvershoot = UseOvershoot.Checked;
@@ -224,5 +232,29 @@ public partial class ConfigWindow : Form
         c.StreamerView = ExperimentalView.Checked;
         var mainForm = Application.OpenForms.OfType<MainWindow>().Single();
         mainForm.ToggleStreamerView();
+    }
+
+    private void ZyroMethod_CheckedChanged(object sender, EventArgs e)
+    {
+        var enabled = !ZyroMethod.Checked;
+
+        UseTouch.Enabled = enabled;
+        UseOvershoot.Enabled = enabled;
+        DodgeSystemUpdate.Enabled = enabled;
+        UseSetStick.Enabled = enabled;
+
+        BaseDelay.Enabled = enabled;
+        OpenHome.Enabled = enabled;
+        NavigateToSettings.Enabled = enabled;
+        OpenSettings.Enabled = enabled;
+        Hold.Enabled = enabled;
+        SystemDDownPresses.Enabled = enabled;
+        Submenu.Enabled = enabled;
+        DateChange.Enabled = enabled;
+        DaysToSkip.Enabled = enabled;
+        ReturnHome.Enabled = enabled;
+        ReturnGame.Enabled = enabled;
+
+        TimeSetDelay.Enabled = !enabled;
     }
 }

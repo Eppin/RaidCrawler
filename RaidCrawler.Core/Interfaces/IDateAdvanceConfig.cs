@@ -9,6 +9,7 @@ public interface IDateAdvanceConfig
     bool UseMapTrick { get; set; }
     bool ZyroMethod { get; set; }
 
+    int TimeSetDelay { get; set; }
     int OpenHomeDelay { get; set; }
     int NavigateToSettingsDelay { get; set; }
     int OpenSettingsDelay { get; set; }

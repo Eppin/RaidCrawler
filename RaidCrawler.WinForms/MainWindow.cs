@@ -1,3 +1,4 @@
+using NLog;
 using PKHeX.Core;
 using PKHeX.Drawing;
 using PKHeX.Drawing.PokeSprite;
@@ -64,6 +65,7 @@ public partial class MainWindow : Form
 
     public MainWindow()
     {
+        LogUtil.Forwarders.Add(Logger);
         Config = new ClientConfig();
 #if DEBUG
         var date = File.GetLastWriteTime(AppContext.BaseDirectory);
@@ -137,6 +139,11 @@ public partial class MainWindow : Form
             USB_Port_TB.Visible = false;
             USB_Port_label.Visible = false;
         }
+    }
+
+    private void Logger(string msg, string identity)
+    {
+        Webhook.SendLogging(msg, identity);
     }
 
     private void UpdateStatus(string status)
@@ -478,8 +485,8 @@ public partial class MainWindow : Form
             stopwatch.Start();
             _WindowState = WindowState;
 
-            var advanceTextInit =
-                $"Day Skip Successes {GetStatDaySkipSuccess()} / {GetStatDaySkipTries()}";
+            var advanceTextInit = $"Day Skip Successes {GetStatDaySkipSuccess()} / {GetStatDaySkipTries()}";
+            LogUtil.LogInfo(advanceTextInit, string.Empty);
             Invoke(() => Label_DayAdvance.Text = advanceTextInit);
             if (teraRaidView is not null)
                 Invoke(() => teraRaidView.DaySkips.Text = advanceTextInit);
@@ -492,6 +499,8 @@ public partial class MainWindow : Form
             {
                 if (skips >= Config.SystemReset)
                 {
+                    LogUtil.LogInfo("Start restarting game...", string.Empty);
+
                     // When raids are generated, the game determines raids for both the current and next day.
                     // In order to avoid rescanning the same raids on a reset, save the game before reset.
                     await ConnectionWrapper.SaveGame(Config, token).ConfigureAwait(false);
@@ -524,8 +533,8 @@ public partial class MainWindow : Form
 
                 stop = StopAdvanceDate(previousSeeds);
                 skips++;
-                var advanceText =
-                    $"Day Skip Successes {GetStatDaySkipSuccess()} / {GetStatDaySkipTries()}";
+                var advanceText = $"Day Skip Successes {GetStatDaySkipSuccess()} / {GetStatDaySkipTries()}";
+                LogUtil.LogInfo(advanceText, string.Empty);
                 Invoke(() => Label_DayAdvance.Text = advanceText);
                 if (teraRaidView is not null)
                     Invoke(() => teraRaidView.DaySkips.Text = advanceText);
@@ -1549,6 +1558,8 @@ public partial class MainWindow : Form
 
         UpdateStatus("Completed!");
 
+        LogResults(raids, encounters);
+
         var filterMatchCount = Enumerable.Range(0, allRaids.Count)
             .Count(c => RaidFilters.Any(z => z.FilterSatisfied(RaidContainer, allEncounters[c], allRaids[c], GetRaidBoost())));
         if (InvokeRequired)
@@ -1580,6 +1591,19 @@ public partial class MainWindow : Form
                 msg = "Bad read, ensure there are no cheats running or anything else that might shift RAM (Edizon, overlays, etc.), then reboot your console and try again.";
                 await this.DisplayMessageBox(Webhook, msg, token, "Raid Read Error").ConfigureAwait(false);
             }
+        }
+    }
+
+    private void LogResults(IReadOnlyList<Raid> Raids, IReadOnlyList<ITeraRaid> Encounters)
+    {
+        foreach (var index in Enumerable.Range(0, Raids.Count))
+        {
+            var raid = Raids[index];
+            var encounter = Encounters[index];
+
+            var message = Webhook.LogEncounter(index, encounter, raid);
+
+            LogUtil.LogInfo(message, string.Empty, raid.IsShiny);
         }
     }
 

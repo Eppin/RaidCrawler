@@ -1,4 +1,4 @@
-﻿using SysBot.Base;
+using SysBot.Base;
 
 namespace RaidCrawler.WinForms.SubForms
 {
@@ -65,7 +65,10 @@ namespace RaidCrawler.WinForms.SubForms
             ExperimentalView = new CheckBox();
             tabControl1 = new TabControl();
             tabGeneral = new TabPage();
+            DiscordLoggingWebhook = new TextBox();
+            DiscordLoggingWebhook_label = new Label();
             LocationGroup = new GroupBox();
+            BlueberryScanCheck = new CheckBox();
             KitakamiScanCheck = new CheckBox();
             PaldeaScanCheck = new CheckBox();
             Protocol_dropdown = new ComboBox();
@@ -79,6 +82,8 @@ namespace RaidCrawler.WinForms.SubForms
             StoryProgress = new ComboBox();
             tabMatch = new TabPage();
             tabAdvanceDate = new TabPage();
+            TimeSetDelay = new NumericUpDown();
+            L_TimeSetDelay = new Label();
             ZyroMethod = new CheckBox();
             UseMapTrick = new CheckBox();
             ExtraOverworldWait = new NumericUpDown();
@@ -118,7 +123,6 @@ namespace RaidCrawler.WinForms.SubForms
             labelAppName = new Label();
             picAppIcon = new PictureBox();
             labelAppVersion = new Label();
-            BlueberryScanCheck = new CheckBox();
             ((System.ComponentModel.ISupportInitialize)SystemDDownPresses).BeginInit();
             ((System.ComponentModel.ISupportInitialize)NavigateToSettings).BeginInit();
             ((System.ComponentModel.ISupportInitialize)OpenSettings).BeginInit();
@@ -134,6 +138,7 @@ namespace RaidCrawler.WinForms.SubForms
             LocationGroup.SuspendLayout();
             tabMatch.SuspendLayout();
             tabAdvanceDate.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)TimeSetDelay).BeginInit();
             ((System.ComponentModel.ISupportInitialize)ExtraOverworldWait).BeginInit();
             ((System.ComponentModel.ISupportInitialize)RelaunchDelay).BeginInit();
             ((System.ComponentModel.ISupportInitialize)SystemReset).BeginInit();
@@ -453,11 +458,13 @@ namespace RaidCrawler.WinForms.SubForms
             tabControl1.Location = new Point(0, 0);
             tabControl1.Name = "tabControl1";
             tabControl1.SelectedIndex = 0;
-            tabControl1.Size = new Size(380, 668);
+            tabControl1.Size = new Size(380, 698);
             tabControl1.TabIndex = 41;
             // 
             // tabGeneral
             // 
+            tabGeneral.Controls.Add(DiscordLoggingWebhook);
+            tabGeneral.Controls.Add(DiscordLoggingWebhook_label);
             tabGeneral.Controls.Add(LocationGroup);
             tabGeneral.Controls.Add(Protocol_dropdown);
             tabGeneral.Controls.Add(Protocol_label);
@@ -471,10 +478,26 @@ namespace RaidCrawler.WinForms.SubForms
             tabGeneral.Location = new Point(4, 24);
             tabGeneral.Name = "tabGeneral";
             tabGeneral.Padding = new Padding(3);
-            tabGeneral.Size = new Size(372, 640);
+            tabGeneral.Size = new Size(372, 670);
             tabGeneral.TabIndex = 5;
             tabGeneral.Text = "General";
             tabGeneral.UseVisualStyleBackColor = true;
+            // 
+            // DiscordLoggingWebhook
+            // 
+            DiscordLoggingWebhook.Location = new Point(6, 251);
+            DiscordLoggingWebhook.Name = "DiscordLoggingWebhook";
+            DiscordLoggingWebhook.Size = new Size(357, 23);
+            DiscordLoggingWebhook.TabIndex = 117;
+            // 
+            // DiscordLoggingWebhook_label
+            // 
+            DiscordLoggingWebhook_label.AutoSize = true;
+            DiscordLoggingWebhook_label.Location = new Point(8, 233);
+            DiscordLoggingWebhook_label.Name = "DiscordLoggingWebhook_label";
+            DiscordLoggingWebhook_label.Size = new Size(302, 15);
+            DiscordLoggingWebhook_label.TabIndex = 116;
+            DiscordLoggingWebhook_label.Text = "Send logging to Discord webhook (leave empty to skip):";
             // 
             // LocationGroup
             // 
@@ -487,6 +510,18 @@ namespace RaidCrawler.WinForms.SubForms
             LocationGroup.TabIndex = 115;
             LocationGroup.TabStop = false;
             LocationGroup.Text = "Scan Locations";
+            // 
+            // BlueberryScanCheck
+            // 
+            BlueberryScanCheck.AutoSize = true;
+            BlueberryScanCheck.Checked = true;
+            BlueberryScanCheck.CheckState = CheckState.Checked;
+            BlueberryScanCheck.Location = new Point(6, 72);
+            BlueberryScanCheck.Name = "BlueberryScanCheck";
+            BlueberryScanCheck.Size = new Size(76, 19);
+            BlueberryScanCheck.TabIndex = 114;
+            BlueberryScanCheck.Text = "Blueberry";
+            BlueberryScanCheck.UseVisualStyleBackColor = true;
             // 
             // KitakamiScanCheck
             // 
@@ -613,13 +648,15 @@ namespace RaidCrawler.WinForms.SubForms
             tabMatch.Location = new Point(4, 24);
             tabMatch.Name = "tabMatch";
             tabMatch.Padding = new Padding(3);
-            tabMatch.Size = new Size(372, 640);
+            tabMatch.Size = new Size(372, 670);
             tabMatch.TabIndex = 0;
             tabMatch.Text = "Match";
             tabMatch.UseVisualStyleBackColor = true;
             // 
             // tabAdvanceDate
             // 
+            tabAdvanceDate.Controls.Add(TimeSetDelay);
+            tabAdvanceDate.Controls.Add(L_TimeSetDelay);
             tabAdvanceDate.Controls.Add(ZyroMethod);
             tabAdvanceDate.Controls.Add(UseMapTrick);
             tabAdvanceDate.Controls.Add(ExtraOverworldWait);
@@ -663,20 +700,39 @@ namespace RaidCrawler.WinForms.SubForms
             tabAdvanceDate.Location = new Point(4, 24);
             tabAdvanceDate.Name = "tabAdvanceDate";
             tabAdvanceDate.Padding = new Padding(3);
-            tabAdvanceDate.Size = new Size(372, 640);
+            tabAdvanceDate.Size = new Size(372, 670);
             tabAdvanceDate.TabIndex = 1;
             tabAdvanceDate.Text = "Advance Date";
             tabAdvanceDate.UseVisualStyleBackColor = true;
+            // 
+            // TimeSetDelay
+            // 
+            TimeSetDelay.Location = new Point(295, 643);
+            TimeSetDelay.Maximum = new decimal(new int[] { 2000, 0, 0, 0 });
+            TimeSetDelay.Name = "TimeSetDelay";
+            TimeSetDelay.Size = new Size(68, 23);
+            TimeSetDelay.TabIndex = 55;
+            TimeSetDelay.Value = new decimal(new int[] { 500, 0, 0, 0 });
+            // 
+            // L_TimeSetDelay
+            // 
+            L_TimeSetDelay.AutoSize = true;
+            L_TimeSetDelay.Location = new Point(7, 645);
+            L_TimeSetDelay.Name = "L_TimeSetDelay";
+            L_TimeSetDelay.Size = new Size(167, 15);
+            L_TimeSetDelay.TabIndex = 54;
+            L_TimeSetDelay.Text = "Time to wait between date set:";
             // 
             // ZyroMethod
             // 
             ZyroMethod.AutoSize = true;
             ZyroMethod.Location = new Point(8, 21);
             ZyroMethod.Name = "ZyroMethod";
-            ZyroMethod.Size = new Size(332, 19);
+            ZyroMethod.Size = new Size(335, 19);
             ZyroMethod.TabIndex = 53;
-            ZyroMethod.Text = "Use Zyro's usb-botbase fork methods (approx. 4-5x faster)";
+            ZyroMethod.Text = "Use Eppin's usb-botbase fork methods (approx. 5x+ faster)";
             ZyroMethod.UseVisualStyleBackColor = true;
+            ZyroMethod.CheckedChanged += ZyroMethod_CheckedChanged;
             // 
             // UseMapTrick
             // 
@@ -844,7 +900,7 @@ namespace RaidCrawler.WinForms.SubForms
             tabWebhook.Controls.Add(EnableEmoji);
             tabWebhook.Location = new Point(4, 24);
             tabWebhook.Name = "tabWebhook";
-            tabWebhook.Size = new Size(372, 640);
+            tabWebhook.Size = new Size(372, 670);
             tabWebhook.TabIndex = 3;
             tabWebhook.Text = "Webhook";
             tabWebhook.UseVisualStyleBackColor = true;
@@ -986,7 +1042,7 @@ namespace RaidCrawler.WinForms.SubForms
             tabExperimental.Location = new Point(4, 24);
             tabExperimental.Name = "tabExperimental";
             tabExperimental.Padding = new Padding(3);
-            tabExperimental.Size = new Size(372, 640);
+            tabExperimental.Size = new Size(372, 670);
             tabExperimental.TabIndex = 2;
             tabExperimental.Text = "Experimental";
             tabExperimental.UseVisualStyleBackColor = true;
@@ -1016,7 +1072,7 @@ namespace RaidCrawler.WinForms.SubForms
             tabAbout.Location = new Point(4, 24);
             tabAbout.Name = "tabAbout";
             tabAbout.Padding = new Padding(3);
-            tabAbout.Size = new Size(372, 640);
+            tabAbout.Size = new Size(372, 670);
             tabAbout.TabIndex = 4;
             tabAbout.Text = "About";
             tabAbout.UseVisualStyleBackColor = true;
@@ -1062,23 +1118,11 @@ namespace RaidCrawler.WinForms.SubForms
             labelAppVersion.Text = "v0.0.0-000000";
             labelAppVersion.TextAlign = ContentAlignment.MiddleCenter;
             // 
-            // BlueberryScanCheck
-            // 
-            BlueberryScanCheck.AutoSize = true;
-            BlueberryScanCheck.Checked = true;
-            BlueberryScanCheck.CheckState = CheckState.Checked;
-            BlueberryScanCheck.Location = new Point(6, 72);
-            BlueberryScanCheck.Name = "BlueberryScanCheck";
-            BlueberryScanCheck.Size = new Size(76, 19);
-            BlueberryScanCheck.TabIndex = 114;
-            BlueberryScanCheck.Text = "Blueberry";
-            BlueberryScanCheck.UseVisualStyleBackColor = true;
-            // 
             // ConfigWindow
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(380, 668);
+            ClientSize = new Size(380, 698);
             Controls.Add(tabControl1);
             FormBorderStyle = FormBorderStyle.FixedDialog;
             MaximizeBox = false;
@@ -1105,6 +1149,7 @@ namespace RaidCrawler.WinForms.SubForms
             tabMatch.PerformLayout();
             tabAdvanceDate.ResumeLayout(false);
             tabAdvanceDate.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)TimeSetDelay).EndInit();
             ((System.ComponentModel.ISupportInitialize)ExtraOverworldWait).EndInit();
             ((System.ComponentModel.ISupportInitialize)RelaunchDelay).EndInit();
             ((System.ComponentModel.ISupportInitialize)SystemReset).EndInit();
@@ -1211,5 +1256,9 @@ namespace RaidCrawler.WinForms.SubForms
         private CheckBox UseMapTrick;
         private CheckBox ZyroMethod;
         private CheckBox BlueberryScanCheck;
+        private NumericUpDown TimeSetDelay;
+        private Label L_TimeSetDelay;
+        private Label DiscordLoggingWebhook_label;
+        private TextBox DiscordLoggingWebhook;
     }
 }
