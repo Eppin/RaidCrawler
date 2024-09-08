@@ -73,6 +73,8 @@ namespace RaidCrawler.WinForms.SubForms
             PaldeaScanCheck = new CheckBox();
             Protocol_dropdown = new ComboBox();
             Protocol_label = new Label();
+            LabelDiscordLoggingWebhook = new Label();
+            DiscordLoggingWebhook = new TextBox();
             label23 = new Label();
             LabelEventProgress = new Label();
             EventProgress = new ComboBox();
@@ -468,6 +470,8 @@ namespace RaidCrawler.WinForms.SubForms
             tabGeneral.Controls.Add(LocationGroup);
             tabGeneral.Controls.Add(Protocol_dropdown);
             tabGeneral.Controls.Add(Protocol_label);
+            tabGeneral.Controls.Add(LabelDiscordLoggingWebhook);
+            tabGeneral.Controls.Add(DiscordLoggingWebhook);
             tabGeneral.Controls.Add(label23);
             tabGeneral.Controls.Add(LabelEventProgress);
             tabGeneral.Controls.Add(EventProgress);
@@ -567,6 +571,22 @@ namespace RaidCrawler.WinForms.SubForms
             Protocol_label.Size = new Size(120, 15);
             Protocol_label.TabIndex = 110;
             Protocol_label.Text = "Connection Protocol:";
+            // 
+            // LabelDiscordLoggingWebhook
+            // 
+            LabelDiscordLoggingWebhook.AutoSize = true;
+            LabelDiscordLoggingWebhook.Location = new Point(8, 227);
+            LabelDiscordLoggingWebhook.Name = "LabelDiscordLoggingWebhook";
+            LabelDiscordLoggingWebhook.Size = new Size(299, 15);
+            LabelDiscordLoggingWebhook.TabIndex = 112;
+            LabelDiscordLoggingWebhook.Text = "Send logging to Discord webhook (leave empty to skip)";
+            // 
+            // DiscordLoggingWebhook
+            // 
+            DiscordLoggingWebhook.Location = new Point(8, 245);
+            DiscordLoggingWebhook.Name = "DiscordLoggingWebhook";
+            DiscordLoggingWebhook.Size = new Size(357, 23);
+            DiscordLoggingWebhook.TabIndex = 111;
             // 
             // label23
             // 
@@ -1236,6 +1256,8 @@ namespace RaidCrawler.WinForms.SubForms
         private Label LabelStoryProgress;
         private ComboBox StoryProgress;
         private Button EmojiConfig;
+        private TextBox DiscordLoggingWebhook;
+        private Label LabelDiscordLoggingWebhook;
         private ComboBox Protocol_dropdown;
         private Label Protocol_label;
         private NumericUpDown BaseDelay;

@@ -8,7 +8,9 @@ using RaidCrawler.Core.Structures;
 using RaidCrawler.WinForms.SubForms;
 using SysBot.Base;
 using System.Diagnostics;
+using System.Text;
 using System.Text.Json;
+using System.Windows.Forms;
 using static RaidCrawler.Core.Structures.Offsets;
 
 namespace RaidCrawler.WinForms;

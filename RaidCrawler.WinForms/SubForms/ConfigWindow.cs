@@ -45,6 +45,8 @@ public partial class ConfigWindow : Form
         UseSetStick.Checked = c.UseSetStick;
         UseMapTrick.Checked = c.UseMapTrick;
 
+        DiscordLoggingWebhook.Text = c.DiscordLoggingWebhook;
+
         OpenHome.Value = c.OpenHomeDelay;
         NavigateToSettings.Value = c.NavigateToSettingsDelay;
         OpenSettings.Value = c.OpenSettingsDelay;

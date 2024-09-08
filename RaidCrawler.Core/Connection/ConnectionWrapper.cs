@@ -71,7 +71,7 @@ public class ConnectionWrapperAsync(SwitchConnectionConfig Config, Action<string
 
     public async Task<int> GetStoryProgress(CancellationToken token)
     {
-        for (int i = DifficultyFlags.Length - 1; i >= 0; i--)
+        for (var i = DifficultyFlags.Length - 1; i >= 0; i--)
         {
             // See https://github.com/Lincoln-LM/sv-live-map/pull/43
             var block = await ReadSaveBlock(DifficultyFlags[i], 1, token).ConfigureAwait(false);
@@ -158,7 +158,7 @@ public class ConnectionWrapperAsync(SwitchConnectionConfig Config, Action<string
     private static byte[] DecryptBlock(uint key, byte[] block)
     {
         var rng = new SCXorShift32(key);
-        for (int i = 0; i < block.Length; i++)
+        for (var i = 0; i < block.Length; i++)
             block[i] = (byte)(block[i] ^ rng.Next());
         return block;
     }
@@ -212,14 +212,10 @@ public class ConnectionWrapperAsync(SwitchConnectionConfig Config, Action<string
         await Task.Delay(delay, token).ConfigureAwait(false);
     }
 
-    private async Task SkipHour(int hours, int delay, CancellationToken token)
+    private async Task DaySkip(CancellationToken token)
     {
-        var command = Encoding.ASCII.GetBytes($"timeSkipForward{(CRLF ? "\r\n" : "")}");
-        for (int i = 0; i < hours; i++)
-        {
-            await Connection.SendAsync(command, token).ConfigureAwait(false);
-            await Task.Delay(delay, token).ConfigureAwait(false);
-        }
+        var command = Encoding.ASCII.GetBytes($"daySkip2{(CRLF ? "\r\n" : "")}");
+        await Connection.SendAsync(command, token).ConfigureAwait(false);
     }
 
     private async Task DaySkip(CancellationToken token)
@@ -266,7 +262,7 @@ public class ConnectionWrapperAsync(SwitchConnectionConfig Config, Action<string
     )
     {
         // Not great, but when adding/removing clicks, make sure to account for command count for an accurate StreamerView progress bar.
-        int steps =
+        var steps =
             (config.UseTouch ? 19 : 25)
             + (config.UseOvershoot ? 2 : config.SystemDownPresses)
             + (config.DodgeSystemUpdate ? 2 : 0)
@@ -308,11 +304,7 @@ public class ConnectionWrapperAsync(SwitchConnectionConfig Config, Action<string
                 await Click(ZR, 2_000, token).ConfigureAwait(false);
                 UpdateProgressBar(action, steps);
             }
-
-            // HOME Menu
-            await Click(HOME, config.OpenHomeDelay + BaseDelay, token).ConfigureAwait(false);
-            UpdateProgressBar(action, steps);
-
+            
             // Navigate to Settings
             if (config.UseTouch)
             {
@@ -325,7 +317,7 @@ public class ConnectionWrapperAsync(SwitchConnectionConfig Config, Action<string
                     .ConfigureAwait(false);
                 UpdateProgressBar(action, steps);
 
-                for (int i = 0; i < 5; i++)
+                for (var i = 0; i < 5; i++)
                 {
                     await Click(DRIGHT, config.NavigateToSettingsDelay + BaseDelay, token)
                         .ConfigureAwait(false);
@@ -362,7 +354,7 @@ public class ConnectionWrapperAsync(SwitchConnectionConfig Config, Action<string
             }
             else
             {
-                for (int i = 0; i < config.SystemDownPresses; i++)
+                for (var i = 0; i < config.SystemDownPresses; i++)
                 {
                     await Click(DDOWN, 0_100 + BaseDelay, token).ConfigureAwait(false);
                     UpdateProgressBar(action, steps);
@@ -381,7 +373,7 @@ public class ConnectionWrapperAsync(SwitchConnectionConfig Config, Action<string
             }
             else
             {
-                for (int i = 0; i < 2; i++)
+                for (var i = 0; i < 2; i++)
                 {
                     await Click(DDOWN, 0_100 + BaseDelay, token).ConfigureAwait(false);
                     UpdateProgressBar(action, steps);
@@ -391,13 +383,13 @@ public class ConnectionWrapperAsync(SwitchConnectionConfig Config, Action<string
             await Click(A, config.DateChange + BaseDelay, token).ConfigureAwait(false);
             UpdateProgressBar(action, steps);
 
-            for (int i = 0; i < config.DaysToSkip; i++)
+            for (var i = 0; i < config.DaysToSkip; i++)
             {
                 await Click(DUP, 0_100 + BaseDelay, token).ConfigureAwait(false);
                 UpdateProgressBar(action, steps);
             }
 
-            for (int i = 0; i < 6; i++)
+            for (var i = 0; i < 6; i++)
             {
                 await Click(DRIGHT, (i < 5 ? 0_050 : 0_100) + BaseDelay, token)
                     .ConfigureAwait(false);
@@ -436,6 +428,13 @@ public class ConnectionWrapperAsync(SwitchConnectionConfig Config, Action<string
         await Click(HOME, 2_000, token).ConfigureAwait(false);
         await Click(X, 1_000, token).ConfigureAwait(false);
         await Click(A, 5_500, token).ConfigureAwait(false);
+
+        // Avoid disconnects on emuNAND
+        var later = DateTime.Now.AddMilliseconds(5_400);
+        StatusUpdate($"Press \"B\" till {later}");
+        while (DateTime.Now <= later)
+            await Click(B, 200, token).ConfigureAwait(false);
+
         StatusUpdate("Closed out of the game!");
     }
 
@@ -445,23 +444,25 @@ public class ConnectionWrapperAsync(SwitchConnectionConfig Config, Action<string
         StatusUpdate("Starting the game!");
         await Click(A, 1_000, token).ConfigureAwait(false);
 
-        // Attempt to dodge an update prompt;
-        await Click(DUP, 0_600, token).ConfigureAwait(false);
-        await Click(A, 1_000, token).ConfigureAwait(false);
+        var later = DateTime.Now.AddMilliseconds(3_000);
+        StatusUpdate($"Press \"X\" till {later}");
+        while (DateTime.Now <= later)
+            await Click(X, 200, token).ConfigureAwait(false);
 
-        // Allow time for profile check if required
-        await Task.Delay(config.RelaunchDelay, token).ConfigureAwait(false);
-
-        // If they have DLC on the system and can't use it, requires an UP + A to start the game.
-        // Should be harmless otherwise since they'll be in loading screen.
-        await Click(DUP, 0_600, token).ConfigureAwait(false);
-        await Click(A, 0_600, token).ConfigureAwait(false);
+        later = DateTime.Now.AddMilliseconds(7_000);
+        StatusUpdate($"Press \"A\" till {later}");
+        while (DateTime.Now <= later)
+            await Click(A, 200, token).ConfigureAwait(false);
 
         // Switch Logo and game load screen
-        await Task.Delay(17_000, token).ConfigureAwait(false);
+        // Avoid disconnects on emuNAND
+        later = DateTime.Now.AddMilliseconds(17_000);
+        StatusUpdate($"Press \"B\" till {later}");
+        while (DateTime.Now <= later)
+            await Click(B, 200, token).ConfigureAwait(false);
 
-        for (int i = 0; i < 20; i++)
-            await Click(A, 1_000, token).ConfigureAwait(false);
+        for (var i = 0; i < 40; i++)
+            await Click(A, 500, token).ConfigureAwait(false);
 
         // Particularly slow switches need more time to load the overworld
         await Task.Delay(config.ExtraOverworldWait, token).ConfigureAwait(false);
@@ -476,7 +477,7 @@ public class ConnectionWrapperAsync(SwitchConnectionConfig Config, Action<string
     {
         StatusUpdate("Saving the game...");
         // B out in case we're in some menu.
-        for (int i = 0; i < 4; i++)
+        for (var i = 0; i < 4; i++)
             await Click(B, 0_500, token).ConfigureAwait(false);
 
         // Open the menu and save.
@@ -487,7 +488,7 @@ public class ConnectionWrapperAsync(SwitchConnectionConfig Config, Action<string
         await Click(A, 3_000 + config.SaveGameDelay, token).ConfigureAwait(false);
 
         // Return to overworld.
-        for (int i = 0; i < 4; i++)
+        for (var i = 0; i < 4; i++)
             await Click(B, 0_500, token).ConfigureAwait(false);
         StatusUpdate("Game saved!");
     }
