@@ -1,6 +1,12 @@
 # RaidCrawler
 
-**This is a fork, using a modified sysbot-base to make day skipping amazingly fast. There is no need to go to the settings menu to advance the dens**
+## Note
+
+New features in this fork:
+- Amazingly fast day skipping using my [sysbot-base](https://github.com/Eppin/sys-botbase/releases) fork, make sure to grab the latest release
+- Send logging to Discord using a webhook
+
+## Original README
 
 ![Version](https://img.shields.io/github/v/release/Eppin/RaidCrawler?label=latest%20release)
 ![Download Count](https://img.shields.io/github/downloads/Eppin/RaidCrawler/total?label=total%20downloads)

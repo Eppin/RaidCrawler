@@ -35,6 +35,9 @@ public partial class ConfigWindow : Form
 
         ZyroMethod.Checked = c.ZyroMethod;
 
+        DiscordLoggingWebhook.Text = c.DiscordLoggingWebhook;
+        TimeSetDelay.Value = c.TimeSetDelay;
+
         UseTouch.Checked = c.UseTouch;
         UseOvershoot.Checked = c.UseOvershoot;
         SaveGame.Checked = c.SaveOnMatch;
@@ -119,6 +122,7 @@ public partial class ConfigWindow : Form
         c.ZyroMethod = ZyroMethod.Checked;
 
         c.DiscordLoggingWebhook = DiscordLoggingWebhook.Text;
+        c.TimeSetDelay = (int)TimeSetDelay.Value;
 
         c.UseTouch = UseTouch.Checked;
         c.UseOvershoot = UseOvershoot.Checked;
@@ -252,5 +256,7 @@ public partial class ConfigWindow : Form
         DaysToSkip.Enabled = enabled;
         ReturnHome.Enabled = enabled;
         ReturnGame.Enabled = enabled;
+
+        TimeSetDelay.Enabled = !enabled;
     }
 }

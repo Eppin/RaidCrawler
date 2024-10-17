@@ -1,26 +1,43 @@
+using PKHeX.Core;
+
 namespace RaidCrawler.Core.Structures
 {
-    public abstract class MapMagic
+    public class MapMagic
     {
-        public const double X_MULT_BASE = 1;
-        public const double X_ADD_BASE = 2.072021484;
-        public const double Y_MULT_BASE = 1;
-        public const double Y_ADD_BASE = 5505.240018;
-        public const short MULT_CONST_BASE = 512;
-        public const short DIV_CONST_BASE = 5000;
+        private double ScaleX { get; init; }
+        private double ScaleZ { get; init; }
+        private double OffsetZ { get; init; }
+        public double ConvertWidth(double s) => (512 / ScaleX) * s;
+        public double ConvertHeight(double s) => (512 / ScaleZ) * s;
+        public double ConvertX(double x) => (512 / ScaleX) * x;
+        public double ConvertZ(double z) => (512 / ScaleZ) * (z + OffsetZ);
 
-        public const double X_MULT_KITAKAMI = 2.766970605475146;
-        public const double X_ADD_KITAKAMI = -248.08352352566726;
-        public const double Y_MULT_KITAKAMI = 2.5700782642623805;
-        public const double Y_ADD_KITAKMI = 5070.808599816581;
-        public const short MULT_CONST_KITAKAMI = 512;
-        public const short DIV_CONST_KITAKAMI = 5000;
+        public static MapMagic GetMapMagic(TeraRaidMapParent parent) => parent switch
+        {
+            TeraRaidMapParent.Blueberry => Blueberry,
+            TeraRaidMapParent.Kitakami => Kitakami,
+            _ => Base,
+        };
 
-        public const double X_MULT_BLUEBERRY = 0.2566504136675;
-        public const double X_ADD_BLUEBERRY = 0.893932258207;
-        public const double Y_MULT_BLUEBERRY = 0.2559781068906;
-        public const double Y_ADD_BLUEBERRY = 511.5361519625;
-        public const short MULT_CONST_BLUEBERRY = 1;
-        public const short DIV_CONST_BLUEBERRY = 1;
+        private static readonly MapMagic Base = new()
+        {
+            ScaleX = 5000,
+            ScaleZ = 5000,
+            OffsetZ = 5500,
+        };
+
+        private static readonly MapMagic Kitakami = new()
+        {
+            ScaleX = 2000,
+            ScaleZ = 2000,
+            OffsetZ = 2000,
+        };
+
+        private static readonly MapMagic Blueberry = new()
+        {
+            ScaleX = 2000,
+            ScaleZ = 2000,
+            OffsetZ = 2000,
+        };
     }
 }

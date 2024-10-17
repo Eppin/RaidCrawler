@@ -29,7 +29,7 @@ public class ClientConfig : IDateAdvanceConfig, IWebhookConfig
     public string DiscordMessageContent { get; set; } = string.Empty;
 
     // Date Advance
-    public bool ZyroMethod { get; set; }
+    public bool ZyroMethod { get; set; } = true;
     public bool UseTouch { get; set; }
     public bool UseOvershoot { get; set; }
     public bool DodgeSystemUpdate { get; set; }

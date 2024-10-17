@@ -1,4 +1,4 @@
-namespace RaidCrawler.WinForms;
+﻿namespace RaidCrawler.WinForms;
 
 using System.Text;
 using NLog;

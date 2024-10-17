@@ -1,4 +1,3 @@
-using Microsoft.VisualBasic;
 using NLog;
 using PKHeX.Core;
 using PKHeX.Drawing;
@@ -68,6 +67,7 @@ public partial class MainWindow : Form
 
     public MainWindow()
     {
+        LogUtil.Forwarders.Add(Logger);
         Config = new ClientConfig();
 #if DEBUG
         var date = File.GetLastWriteTime(AppContext.BaseDirectory);
@@ -141,6 +141,11 @@ public partial class MainWindow : Form
             USB_Port_TB.Visible = false;
             USB_Port_label.Visible = false;
         }
+    }
+
+    private void Logger(string msg, string identity)
+    {
+        Webhook.SendLogging(msg, identity);
     }
 
     private void UpdateStatus(string status)
@@ -344,7 +349,7 @@ public partial class MainWindow : Form
                     return;
                 }
 
-                ButtonEnable(true, ButtonAdvanceDate, ButtonReadRaids, ButtonDisconnect, ButtonViewRAM, ButtonDownloadEvents, SendScreenshot, btnOpenMap, Rewards, B_ResetTime);
+                ButtonEnable(true, ButtonAdvanceDate, ButtonReadRaids, ButtonDisconnect, ButtonViewRAM, ButtonDownloadEvents, SendScreenshot, btnOpenMap, Rewards, B_DateTools);
                 if (InvokeRequired)
                 {
                     Invoke(() =>
@@ -380,14 +385,15 @@ public partial class MainWindow : Form
         Task.Run(
             async () =>
             {
-                ButtonEnable(false, ButtonAdvanceDate, ButtonReadRaids, ButtonDisconnect, ButtonViewRAM, ButtonDownloadEvents, SendScreenshot, B_ResetTime);
+                ButtonEnable(false, ButtonAdvanceDate, ButtonReadRaids, ButtonDisconnect, ButtonViewRAM, ButtonDownloadEvents, SendScreenshot, B_DateTools);
                 try
                 {
                     (bool success, string err) = await ConnectionWrapper
                         .DisconnectAsync(token)
                         .ConfigureAwait(false);
                     if (!success)
-                        await this.DisplayMessageBox(Webhook, err, token).ConfigureAwait(false); }
+                        await this.DisplayMessageBox(Webhook, err, token).ConfigureAwait(false);
+                }
                 catch (Exception ex)
                 {
                     await this
@@ -481,8 +487,8 @@ public partial class MainWindow : Form
             stopwatch.Start();
             _WindowState = WindowState;
 
-            var advanceTextInit =
-                $"Day Skip Successes {GetStatDaySkipSuccess()} / {GetStatDaySkipTries()}";
+            var advanceTextInit = $"Day Skip Successes {GetStatDaySkipSuccess()} / {GetStatDaySkipTries()}";
+            LogUtil.LogInfo(advanceTextInit, string.Empty);
             Invoke(() => Label_DayAdvance.Text = advanceTextInit);
             if (teraRaidView is not null)
                 Invoke(() => teraRaidView.DaySkips.Text = advanceTextInit);
@@ -495,6 +501,8 @@ public partial class MainWindow : Form
             {
                 if (skips >= Config.SystemReset)
                 {
+                    LogUtil.LogInfo("Start restarting game...", string.Empty);
+
                     // When raids are generated, the game determines raids for both the current and next day.
                     // In order to avoid rescanning the same raids on a reset, save the game before reset.
                     await ConnectionWrapper.SaveGame(Config, token).ConfigureAwait(false);
@@ -527,8 +535,8 @@ public partial class MainWindow : Form
 
                 stop = StopAdvanceDate(previousSeeds);
                 skips++;
-                var advanceText =
-                    $"Day Skip Successes {GetStatDaySkipSuccess()} / {GetStatDaySkipTries()}";
+                var advanceText = $"Day Skip Successes {GetStatDaySkipSuccess()} / {GetStatDaySkipTries()}";
+                LogUtil.LogInfo(advanceText, string.Empty);
                 Invoke(() => Label_DayAdvance.Text = advanceText);
                 if (teraRaidView is not null)
                     Invoke(() => teraRaidView.DaySkips.Text = advanceText);
@@ -806,10 +814,10 @@ public partial class MainWindow : Form
         Config.EnableFilters = CheckEnableFilters.Checked;
     }
 
+    private readonly JsonSerializerOptions options = new() { WriteIndented = true };
     private void MainWindow_FormClosing(object sender, FormClosingEventArgs e)
     {
         var configpath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "config.json");
-        JsonSerializerOptions options = new() { WriteIndented = true };
         string output = JsonSerializer.Serialize(Config, options);
         using StreamWriter sw = new(configpath);
         sw.Write(output);
@@ -1364,8 +1372,12 @@ public partial class MainWindow : Form
         var gem = new Bitmap(original, new Size(30, 30));
         SpriteUtil.GetSpriteGlow(gem, 0xFF, 0xFF, 0xFF, out var glow, true);
         gem = ImageUtil.LayerImage(gem, ImageUtil.GetBitmap(glow, gem.Width, gem.Height, gem.PixelFormat), 0, 0);
-        if (DenLocationsBase is null || DenLocationsBase.Count == 0 || DenLocationsKitakami is null || DenLocationsKitakami.Count == 0)
+        if (DenLocationsBase is null || DenLocationsBase.Count == 0 ||
+            DenLocationsKitakami is null || DenLocationsKitakami.Count == 0 ||
+            DenLocationsBlueberry is null || DenLocationsBlueberry.Count == 0)
+        {
             return null;
+        }
 
         var locData = raid.MapParent switch
         {
@@ -1381,8 +1393,8 @@ public partial class MainWindow : Form
         };
         try
         {
-            (double x, double y) = GetCoordinate(raid, locData);
-            return ImageUtil.LayerImage(map, gem, (int)x, (int)y);
+            (double x, double z) = GetCoordinate(raid, locData, gem);
+            return ImageUtil.LayerImage(map, gem, (int)x, (int)z);
         }
         catch
         {
@@ -1390,17 +1402,13 @@ public partial class MainWindow : Form
         }
     }
 
-    private static (double x, double y) GetCoordinate(Raid raid, IReadOnlyDictionary<string, float[]> locData)
+    private static (double x, double y) GetCoordinate(Raid raid, IReadOnlyDictionary<string, float[]> locData, Bitmap gem)
     {
-        (double a, double b, double c, double d, short e, short f) = raid.MapParent switch
-        {
-            TeraRaidMapParent.Paldea => (MapMagic.X_MULT_BASE, MapMagic.X_ADD_BASE, MapMagic.Y_MULT_BASE, MapMagic.Y_ADD_BASE, MapMagic.MULT_CONST_BASE, MapMagic.DIV_CONST_BASE),
-            TeraRaidMapParent.Kitakami => (MapMagic.X_MULT_KITAKAMI, MapMagic.X_ADD_KITAKAMI, MapMagic.Y_MULT_KITAKAMI, MapMagic.Y_ADD_KITAKMI, MapMagic.MULT_CONST_KITAKAMI, MapMagic.DIV_CONST_KITAKAMI),
-            _ => (MapMagic.X_MULT_BLUEBERRY, MapMagic.X_ADD_BLUEBERRY, MapMagic.Y_MULT_BLUEBERRY, MapMagic.Y_ADD_BLUEBERRY, MapMagic.MULT_CONST_BLUEBERRY, MapMagic.DIV_CONST_BLUEBERRY)
-        };
-        double x = ((a * locData[$"{raid.Area}-{raid.LotteryGroup}-{raid.Den}"][0]) + b) * e / f;
-        double y = ((c * locData[$"{raid.Area}-{raid.LotteryGroup}-{raid.Den}"][2]) + d) * e / f;
-        return (x, y);
+        var m = MapMagic.GetMapMagic(raid.MapParent);
+        double x = m.ConvertX(locData[$"{raid.Area}-{raid.LotteryGroup}-{raid.Den}"][0]) - (gem.Size.Width / 2);
+        double z = m.ConvertZ(locData[$"{raid.Area}-{raid.LotteryGroup}-{raid.Den}"][2]) - (gem.Size.Height / 2);
+
+        return (x, z);
     }
 
     private bool StopAdvanceDate(IEnumerable<uint> previousSeeds)
@@ -1552,6 +1560,8 @@ public partial class MainWindow : Form
 
         UpdateStatus("Completed!");
 
+        LogResults(raids, encounters);
+
         var filterMatchCount = Enumerable.Range(0, allRaids.Count)
             .Count(c => RaidFilters.Any(z => z.FilterSatisfied(RaidContainer, allEncounters[c], allRaids[c], GetRaidBoost())));
         if (InvokeRequired)
@@ -1583,6 +1593,19 @@ public partial class MainWindow : Form
                 msg = "Bad read, ensure there are no cheats running or anything else that might shift RAM (Edizon, overlays, etc.), then reboot your console and try again.";
                 await this.DisplayMessageBox(Webhook, msg, token, "Raid Read Error").ConfigureAwait(false);
             }
+        }
+    }
+
+    private void LogResults(IReadOnlyList<Raid> Raids, IReadOnlyList<ITeraRaid> Encounters)
+    {
+        foreach (var index in Enumerable.Range(0, Raids.Count))
+        {
+            var raid = Raids[index];
+            var encounter = Encounters[index];
+
+            var message = Webhook.LogEncounter(index, encounter, raid);
+
+            LogUtil.LogInfo(message, string.Empty, raid.IsShiny);
         }
     }
 
@@ -1805,19 +1828,19 @@ public partial class MainWindow : Form
         return spriteName.Replace('_', '-').Insert(0, "_");
     }
 
-    private void B_ResetTime_Click(object sender, EventArgs e)
+    private void B_DateTools_Click(object sender, EventArgs e)
     {
         Task.Run(async () =>
         {
             try
             {
-                UpdateStatus("Resetting date...");
-                await ConnectionWrapper.ResetTime(Source.Token).ConfigureAwait(false);
-                UpdateStatus("Date reset!");
+                var tick = await ConnectionWrapper.GetCurrentTime(Source.Token).ConfigureAwait(false);
+                var form = new TickModifier(tick, ConnectionWrapper, Webhook, Source.Token);
+                ShowDialog(form);
             }
             catch (Exception ex)
             {
-                await this.DisplayMessageBox(Webhook, $"Could not reset the date: {ex.Message}", Source.Token).ConfigureAwait(false);
+                await this.DisplayMessageBox(Webhook, $"Could not read the date: {ex.Message}", Source.Token).ConfigureAwait(false);
             }
         });
     }

@@ -214,13 +214,36 @@ public class ConnectionWrapperAsync(SwitchConnectionConfig Config, Action<string
 
     private async Task DaySkip(CancellationToken token)
     {
-        var command = Encoding.ASCII.GetBytes($"daySkip2{(CRLF ? "\r\n" : "")}");
+        // Write the date of today as date
+        var timeToSet = (int)DateTime.UtcNow.Date.Subtract(new DateTime(1970, 1, 1)).TotalSeconds;
+
+        var command = Encoding.ASCII.GetBytes($"dateSet {timeToSet}{(CRLF ? "\r\n" : "")}");
         await Connection.SendAsync(command, token).ConfigureAwait(false);
     }
 
     public async Task ResetTime(CancellationToken token)
     {
         var command = Encoding.ASCII.GetBytes($"resetTime{(CRLF ? "\r\n" : "")}");
+        await Connection.SendAsync(command, token).ConfigureAwait(false);
+    }
+
+    public async Task ResetTimeNTP(CancellationToken token)
+    {
+        var command = Encoding.ASCII.GetBytes($"resetTimeNTP{(CRLF ? "\r\n" : "")}");
+        await Connection.SendAsync(command, token).ConfigureAwait(false);
+    }
+
+    public async Task<ulong> GetCurrentTime(CancellationToken token)
+    {
+        var command = Encoding.ASCII.GetBytes($"getCurrentTime{(CRLF ? "\r\n" : "")}");
+        var res = await Connection.ReadRaw(command, 17, token).ConfigureAwait(false);
+        ulong.TryParse(Encoding.ASCII.GetString(res).Trim('\n'), System.Globalization.NumberStyles.AllowHexSpecifier, null, out var time);
+        return time;
+    }
+
+    public async Task SetCurrentTime(ulong date, CancellationToken token)
+    {
+        var command = Encoding.ASCII.GetBytes($"setCurrentTime {date}{(CRLF ? "\r\n" : "")}");
         await Connection.SendAsync(command, token).ConfigureAwait(false);
     }
 
